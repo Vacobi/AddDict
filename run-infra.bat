@@ -1,0 +1,1 @@
+docker-compose -p infra-adddict up master_postgres master_redis

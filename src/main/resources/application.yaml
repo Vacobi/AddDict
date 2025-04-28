@@ -1,0 +1,44 @@
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/add_dict_db}
+    username: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWORD:pswd}
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+
+
+  data:
+    redis:
+      host: ${SPRING_REDIS_HOST:localhost}
+      port: ${SPRING_REDIS_PORT:6379}
+      connection_factory: jedis # `jedis` or `lettuce`
+
+server:
+  port: 8080
+
+logging:
+  level:
+    root: info
+
+    org:
+      springframework:
+        security: debug
+        web: debug
+      hibernate:
+        sql: debug
+        engine:
+          jdbc:
+            batch:
+              internal:
+                BatchingBatch: TRACE
