@@ -17,6 +17,11 @@ spring:
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
 
+  dictionary-validation-rule:
+    name:
+      length: 128
+    description:
+      length: 256
 
   data:
     redis:
