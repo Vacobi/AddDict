@@ -65,10 +65,11 @@ dependencies {
 	/**
 	 * Test containers
 	 */
-	implementation(platform("org.testcontainers:testcontainers-bom:1.19.1"))
-	testImplementation("org.testcontainers:junit-jupiter:1.19.1")
-	testImplementation("org.testcontainers:postgresql:1.19.1")
+	implementation(platform("org.testcontainers:testcontainers-bom:1.19.7"))
+	testImplementation("org.testcontainers:junit-jupiter")
+	testImplementation("org.testcontainers:postgresql")
 	testImplementation("com.redis.testcontainers:testcontainers-redis-junit-jupiter:1.4.6")
+	testImplementation(platform("org.testcontainers:testcontainers-bom:1.19.7"))
 
 	/**
 	 * Tests
@@ -92,7 +93,21 @@ configurations.all {
 
 tasks.withType<Test> {
 	useJUnitPlatform()
-	jvmArgs = listOf("-Djdk.instrument.traceUsage", "-XX:+EnableDynamicAgentLoading")
+	jvmArgs = listOf(
+		"-Djdk.instrument.traceUsage",
+		"-XX:+EnableDynamicAgentLoading",
+		"--add-opens", "java.base/java.lang=ALL-UNNAMED",
+		"--add-opens", "java.base/java.util=ALL-UNNAMED",
+		"--add-opens", "java.base/java.lang.reflect=ALL-UNNAMED",
+		"--add-opens", "java.base/java.net=ALL-UNNAMED",
+		"--add-opens", "java.base/java.io=ALL-UNNAMED",
+		"--add-opens", "java.base/sun.nio.ch=ALL-UNNAMED",
+		"--add-opens", "java.base/java.nio=ALL-UNNAMED",
+		"--add-opens", "java.base/java.util.concurrent=ALL-UNNAMED",
+		"--add-opens", "java.base/java.util.concurrent.atomic=ALL-UNNAMED",
+		"--add-opens", "java.base/java.util.stream=ALL-UNNAMED"
+	)
+	testLogging.showStandardStreams = true
 }
 
 val test by tasks.getting(Test::class) { testLogging.showStandardStreams = true }
