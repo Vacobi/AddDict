@@ -1,7 +1,7 @@
 plugins {
 	java
-	id("org.springframework.boot") version "3.4.4"
-	id("io.spring.dependency-management") version "1.1.7"
+	id("org.springframework.boot") version "3.2.5"
+	id("io.spring.dependency-management") version "1.1.4"
 }
 
 group = "ru.vstu"
@@ -27,7 +27,7 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.springframework.boot:spring-boot-starter-security")
 	implementation("org.springframework.boot:spring-boot-starter-validation")
-	implementation("org.springframework.cloud:spring-cloud-starter-openfeign:4.2.0")
+	implementation("org.springframework.cloud:spring-cloud-starter-openfeign:4.1.1")
 	annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 	implementation("org.springframework.retry:spring-retry:2.0.2")
 
@@ -54,8 +54,8 @@ dependencies {
 	 */
 	implementation("com.fasterxml.jackson.core:jackson-databind:2.17.0")
 	implementation("org.slf4j:slf4j-api:2.0.5")
-	implementation("ch.qos.logback:logback-classic:1.5.18")
-	implementation("ch.qos.logback:logback-core:1.5.18")
+	implementation("ch.qos.logback:logback-classic:1.5.6")
+	implementation("ch.qos.logback:logback-core:1.5.6")
 	implementation("org.projectlombok:lombok:1.18.32")
 	annotationProcessor("org.projectlombok:lombok:1.18.32")
 	implementation("org.mapstruct:mapstruct:1.5.3.Final")
