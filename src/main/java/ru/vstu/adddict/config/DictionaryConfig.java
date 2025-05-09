@@ -22,4 +22,9 @@ public class DictionaryConfig {
     public int dictionaryDescriptionLength() {
         return dictionaryDescriptionLength;
     }
+
+    @Bean
+    public String userIdHeaderAttribute() {
+        return "x-user-id";
+    }
 }
