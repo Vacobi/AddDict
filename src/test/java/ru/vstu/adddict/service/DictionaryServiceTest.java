@@ -8,6 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import ru.vstu.adddict.config.TestContainersConfig;
 import ru.vstu.adddict.dto.*;
+import ru.vstu.adddict.entity.Dictionary;
 import ru.vstu.adddict.mapper.DictionaryMapper;
 import ru.vstu.adddict.repository.DictionariesRepository;
 import ru.vstu.adddict.testutils.ClearableTest;
@@ -63,6 +64,56 @@ class DictionaryServiceTest {
             assertDictionariesDtoEquals(expectedDto, actualDto);
             DictionaryDto actualDtoInRepos = dictionaryMapper.toDto(dictionariesRepository.findById(actualDto.getId()).get());
             assertDictionariesDtoEquals(expectedDto, actualDtoInRepos);
+        }
+    }
+
+    @Nested
+    class GetDictionaryTest extends ClearableTest {
+
+        @Test
+        void getDictionary() {
+
+            final Long authorId = 1L;
+            LocalDateTime now = LocalDateTime.now();
+
+            Dictionary dictionaryToPersist = Dictionary.builder()
+                    .name("test")
+                    .description("test description")
+                    .isPublic(true)
+                    .createdAt(now)
+                    .authorId(authorId)
+                    .build();
+
+            Dictionary persistedDictionary = dictionariesRepository.save(dictionaryToPersist);
+            final Long dictionaryId = persistedDictionary.getId();
+
+            Dictionary expectedEntity = Dictionary.builder()
+                    .id(dictionaryId)
+                    .name("test")
+                    .description("test description")
+                    .isPublic(true)
+                    .createdAt(now)
+                    .authorId(authorId)
+                    .build();
+
+            DictionaryDto expectedDto = DictionaryDto.builder()
+                    .id(dictionaryId)
+                    .name("test")
+                    .description("test description")
+                    .isPublic(true)
+                    .createdAt(now)
+                    .authorId(authorId)
+                    .build();
+
+            GetDictionaryRequestDto requestDto = GetDictionaryRequestDto.builder()
+                    .id(dictionaryId)
+                    .requestSenderId(authorId)
+                    .build();
+
+            DictionaryDto actualDto = dictionaryService.getDictionary(requestDto);
+
+            assertEquals(expectedEntity, persistedDictionary);
+            assertDictionariesDtoEquals(expectedDto, actualDto);
         }
     }
 }
