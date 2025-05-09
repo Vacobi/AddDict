@@ -2,8 +2,10 @@ package ru.vstu.adddict.mapper;
 
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 import ru.vstu.adddict.dto.CreateDictionaryRequestDto;
+import ru.vstu.adddict.dto.DictionaryDto;
 import ru.vstu.adddict.entity.Dictionary;
 
 import java.time.LocalDateTime;
@@ -30,4 +32,7 @@ public interface DictionaryMapper {
 
         return dictionary;
     }
+
+    @Mapping(source = "public", target = "isPublic")
+    DictionaryDto toDto(Dictionary dictionary);
 }
