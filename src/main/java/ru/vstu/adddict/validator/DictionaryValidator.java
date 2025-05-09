@@ -3,6 +3,7 @@ package ru.vstu.adddict.validator;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import ru.vstu.adddict.dto.CreateDictionaryRequestDto;
+import ru.vstu.adddict.dto.UpdateDictionaryRequestDto;
 import ru.vstu.adddict.exception.ClientExceptionName;
 import ru.vstu.adddict.exception.GroupValidationException;
 import ru.vstu.adddict.exception.ValidationException;
@@ -30,6 +31,15 @@ public class DictionaryValidator {
 
         exceptions.addAll(validateName(createDictionaryRequestDto.getName()));
         exceptions.addAll(validateDescription(createDictionaryRequestDto.getDescription()));
+
+        return exceptions.isEmpty() ? Optional.empty() : Optional.of(new GroupValidationException(exceptions));
+    }
+
+    public Optional<GroupValidationException> validateUpdateDictionaryRequest(UpdateDictionaryRequestDto updateDictionaryRequestDto) {
+        List<ValidationException> exceptions = new LinkedList<>();
+
+        exceptions.addAll(validateName(updateDictionaryRequestDto.getName()));
+        exceptions.addAll(validateDescription(updateDictionaryRequestDto.getDescription()));
 
         return exceptions.isEmpty() ? Optional.empty() : Optional.of(new GroupValidationException(exceptions));
     }
