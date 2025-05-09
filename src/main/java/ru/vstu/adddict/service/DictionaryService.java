@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.vstu.adddict.dto.CreateDictionaryRequestDto;
 import ru.vstu.adddict.dto.DictionaryDto;
 import ru.vstu.adddict.dto.GetDictionaryRequestDto;
+import ru.vstu.adddict.dto.UpdateDictionaryRequestDto;
 import ru.vstu.adddict.entity.Dictionary;
 import ru.vstu.adddict.exception.DictionaryNonExistException;
 import ru.vstu.adddict.exception.NotAllowedException;
@@ -14,6 +15,7 @@ import ru.vstu.adddict.mapper.DictionaryMapper;
 import ru.vstu.adddict.repository.DictionariesRepository;
 import ru.vstu.adddict.validator.DictionaryValidator;
 
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
@@ -60,5 +62,38 @@ public class DictionaryService {
 
     public boolean forbiddenToGetByThisUser(Dictionary dictionary, Long requestSenderId) {
         return !dictionary.isPublic() && !dictionary.isDictionaryOwner(requestSenderId);
+    }
+
+    @Transactional
+    public DictionaryDto updateDictionary(Long dictionaryId, UpdateDictionaryRequestDto updateDictionaryRequestDto) {
+
+        dictionaryValidator.validateUpdateDictionaryRequest(updateDictionaryRequestDto).ifPresent(e -> {
+            throw e;
+        });
+
+        DictionaryDto updatedDictionary = updateDictionaryInRepository(dictionaryId, updateDictionaryRequestDto);
+
+        return updatedDictionary;
+    }
+
+    private DictionaryDto updateDictionaryInRepository(Long dictionaryId, UpdateDictionaryRequestDto updateDictionaryRequestDto) {
+
+        try {
+            Dictionary updated = dictionariesRepository.updateWithLock(
+                    updateDictionaryRequestDto.getRequestSenderId(),
+                    persisted -> {
+                        persisted = dictionaryMapper.fromUpdateRequest(persisted, updateDictionaryRequestDto);
+                        if (!persisted.isDictionaryOwner(dictionaryId)) {
+                            throw new NotAllowedException("Can't update dictionary with id: "
+                                    + persisted.getId()
+                                    + ". This dictionary belongs to other user.");
+                        }
+                        return persisted;
+                    });
+
+            return dictionaryMapper.toDto(updated);
+        } catch (NoSuchElementException e) {
+            throw new DictionaryNonExistException(dictionaryId);
+        }
     }
 }
