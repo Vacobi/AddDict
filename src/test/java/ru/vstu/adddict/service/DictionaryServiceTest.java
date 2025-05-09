@@ -116,4 +116,56 @@ class DictionaryServiceTest {
             assertDictionariesDtoEquals(expectedDto, actualDto);
         }
     }
+
+    @Nested
+    class UpdateDictionaryTest extends ClearableTest {
+
+        DictionaryDto generateDictionaryToRepos(Long authorId) {
+
+            String name = "test";
+            String description = "test description";
+            boolean isPublic = true;
+            CreateDictionaryRequestDto createDictionaryRequestDto = CreateDictionaryRequestDto.builder()
+                    .name(name)
+                    .description(description)
+                    .isPublic(isPublic)
+                    .authorId(authorId)
+                    .build();
+
+            return dictionaryService.createDictionary(createDictionaryRequestDto);
+        }
+
+        @Test
+        void updateEveryFieldInDictionaryExceptAuthor() {
+            long authorId = 1L;
+            DictionaryDto dictionaryDtoBeforeUpdate = generateDictionaryToRepos(authorId);
+
+            String name = "new test name";
+            String description = "new test description";
+            boolean isPublic = false;
+            UpdateDictionaryRequestDto requestDto = UpdateDictionaryRequestDto.builder()
+                    .name(name)
+                    .description(description)
+                    .isPublic(isPublic)
+                    .requestSenderId(authorId)
+                    .build();
+            Long dictionaryId = dictionaryDtoBeforeUpdate.getId();
+
+            DictionaryDto expDto = dictionaryMapper.toDto(dictionariesRepository.findById(dictionaryId).get());
+            expDto.setName(name);
+            expDto.setDescription(description);
+            expDto.setIsPublic(isPublic);
+
+
+            long countOfDictionariesInReposBeforeUpdate = dictionariesRepository.count();
+            DictionaryDto actualDto = dictionaryService.updateDictionary(dictionaryId, requestDto);
+            long countOfDictionariesInReposAfterUpdate = dictionariesRepository.count();
+
+
+            assertDictionariesDtoEquals(expDto, actualDto);
+            DictionaryDto actualDtoInRepos = dictionaryMapper.toDto(dictionariesRepository.findById(dictionaryId).get());
+            assertDictionariesDtoEquals(expDto, actualDtoInRepos);
+            assertEquals(countOfDictionariesInReposBeforeUpdate, countOfDictionariesInReposAfterUpdate);
+        }
+    }
 }
