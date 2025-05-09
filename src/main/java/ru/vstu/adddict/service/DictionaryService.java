@@ -6,10 +6,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.vstu.adddict.dto.CreateDictionaryRequestDto;
 import ru.vstu.adddict.dto.DictionaryDto;
+import ru.vstu.adddict.dto.GetDictionaryRequestDto;
 import ru.vstu.adddict.entity.Dictionary;
+import ru.vstu.adddict.exception.DictionaryNonExistException;
+import ru.vstu.adddict.exception.NotAllowedException;
 import ru.vstu.adddict.mapper.DictionaryMapper;
 import ru.vstu.adddict.repository.DictionariesRepository;
 import ru.vstu.adddict.validator.DictionaryValidator;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -32,5 +37,28 @@ public class DictionaryService {
         Dictionary savedDictionary = dictionariesRepository.save(dictionary);
 
         return dictionaryMapper.toDto(savedDictionary);
+    }
+
+    @Transactional // For caching in future
+    public DictionaryDto getDictionary(GetDictionaryRequestDto getDictionaryRequestDto) {
+        Optional<Dictionary> dictionaryInRepos = dictionariesRepository.findById(getDictionaryRequestDto.getId());
+
+        if (dictionaryInRepos.isEmpty()) {
+            throw new DictionaryNonExistException(getDictionaryRequestDto.getId());
+        }
+
+        Dictionary dictionary = dictionaryInRepos.get();
+
+        if (forbiddenToGetByThisUser(dictionary, getDictionaryRequestDto.getRequestSenderId())) {
+            throw new NotAllowedException("Can't let dictionary with id: "
+                    + dictionary.getId()
+                    + " to this user. This dictionary is private and belongs to other user.");
+        }
+
+        return dictionaryMapper.toDto(dictionary);
+    }
+
+    public boolean forbiddenToGetByThisUser(Dictionary dictionary, Long requestSenderId) {
+        return !dictionary.isPublic() && !dictionary.isDictionaryOwner(requestSenderId);
     }
 }
