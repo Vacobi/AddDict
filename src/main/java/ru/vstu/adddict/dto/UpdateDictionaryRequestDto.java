@@ -14,4 +14,11 @@ public class UpdateDictionaryRequestDto {
     private String description;
     private Boolean isPublic;
     private Long requestSenderId;
+
+    public boolean isEmpty() {
+        return name == null &&
+                description == null &&
+                isPublic == null &&
+                requestSenderId == null;
+    }
 }

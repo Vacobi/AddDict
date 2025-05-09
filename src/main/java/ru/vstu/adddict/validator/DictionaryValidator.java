@@ -38,8 +38,19 @@ public class DictionaryValidator {
     public Optional<GroupValidationException> validateUpdateDictionaryRequest(UpdateDictionaryRequestDto updateDictionaryRequestDto) {
         List<ValidationException> exceptions = new LinkedList<>();
 
-        exceptions.addAll(validateName(updateDictionaryRequestDto.getName()));
-        exceptions.addAll(validateDescription(updateDictionaryRequestDto.getDescription()));
+        if (updateDictionaryRequestDto.isEmpty()) {
+            String exceptionDescription = "All fields in update request are not set.";
+            exceptions.add(new ValidationException(exceptionDescription, ClientExceptionName.EMPTY_UPDATE_REQUEST));
+            return Optional.of(new GroupValidationException(exceptions));
+        }
+
+        if (updateDictionaryRequestDto.getName() != null) {
+            exceptions.addAll(validateName(updateDictionaryRequestDto.getName()));
+        }
+
+        if (updateDictionaryRequestDto.getDescription() != null) {
+            exceptions.addAll(validateDescription(updateDictionaryRequestDto.getDescription()));
+        }
 
         return exceptions.isEmpty() ? Optional.empty() : Optional.of(new GroupValidationException(exceptions));
     }
