@@ -29,7 +29,7 @@ public class Dictionary extends BaseDictionary{
     private Boolean isPublic;
 
     @ColumnDefault("CURRENT_TIMESTAMP")
-    @Column(name = "created_at")
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "author_id", nullable = false)
