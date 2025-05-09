@@ -5,6 +5,7 @@ import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity
 @NoArgsConstructor
@@ -93,5 +94,10 @@ public class Dictionary extends BaseDictionary{
     @Override
     public Long getAuthorId() {
         return authorId;
+    }
+
+    public boolean isDictionaryOwner(Long authorId) {
+        if (getId() == null || authorId == null) return false;
+        return Objects.equals(getAuthorId(), authorId);
     }
 }
