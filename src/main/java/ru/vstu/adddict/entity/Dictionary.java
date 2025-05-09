@@ -26,7 +26,7 @@ public class Dictionary extends BaseDictionary{
     private String description;
 
     @Column(name = "is_public", nullable = false)
-    private boolean isPublic;
+    private Boolean isPublic;
 
     @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "created_at")
