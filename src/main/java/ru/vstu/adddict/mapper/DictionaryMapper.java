@@ -6,6 +6,8 @@ import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 import ru.vstu.adddict.dto.CreateDictionaryRequestDto;
 import ru.vstu.adddict.dto.DictionaryDto;
+import ru.vstu.adddict.dto.UpdateDictionaryRequestDto;
+import ru.vstu.adddict.entity.BaseDictionary;
 import ru.vstu.adddict.entity.Dictionary;
 
 import java.time.LocalDateTime;
@@ -35,4 +37,20 @@ public interface DictionaryMapper {
 
     @Mapping(source = "public", target = "isPublic")
     DictionaryDto toDto(Dictionary dictionary);
+
+    default <T extends BaseDictionary> T fromUpdateRequest(T persisted, UpdateDictionaryRequestDto updateRequest) {
+        if (updateRequest.getName() != null) {
+            persisted.setName(updateRequest.getName());
+        }
+
+        if (updateRequest.getDescription() != null) {
+            persisted.setDescription(updateRequest.getDescription());
+        }
+
+        if (updateRequest.getIsPublic() != null) {
+            persisted.setPublic(updateRequest.getIsPublic());
+        }
+
+        return persisted;
+    }
 }
