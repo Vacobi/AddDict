@@ -6,6 +6,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 import ru.vstu.adddict.dto.CreateDictionaryRequestDto;
 import ru.vstu.adddict.dto.DictionaryDto;
+import ru.vstu.adddict.dto.DictionaryResponseDto;
 import ru.vstu.adddict.dto.UpdateDictionaryRequestDto;
 import ru.vstu.adddict.entity.BaseDictionary;
 import ru.vstu.adddict.entity.Dictionary;
@@ -53,4 +54,6 @@ public interface DictionaryMapper {
 
         return persisted;
     }
+
+    DictionaryResponseDto toDictionaryResponseDto(DictionaryDto dictionary);
 }
