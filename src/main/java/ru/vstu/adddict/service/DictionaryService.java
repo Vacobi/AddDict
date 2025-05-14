@@ -97,6 +97,27 @@ public class DictionaryService {
         }
     }
 
+    @Transactional
+    public boolean deleteDictionary(Long id, Long userId) {
+        Optional<Dictionary> optionalDictionary = getDictionary(id);
+
+        if (optionalDictionary.isEmpty()) {
+            throw new DictionaryNonExistException(id);
+        }
+
+        Dictionary dictionary = optionalDictionary.get();
+
+        if (!dictionary.isDictionaryOwner(userId)) {
+            throw new NotAllowedException("Can't delete dictionary with id: "
+                    + dictionary.getId()
+                    + ". This dictionary belongs to other user.");
+        }
+
+        dictionariesRepository.deleteById(id);
+
+        return true;
+    }
+
     private Optional<Dictionary> getDictionary(Long id) {
         return dictionariesRepository.findById(id);
     }

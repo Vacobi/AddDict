@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import ru.vstu.adddict.entity.Dictionary;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.function.UnaryOperator;
 
@@ -30,4 +31,6 @@ public interface DictionariesRepository extends JpaRepository<Dictionary, Long> 
 
         return updated;
     }
+
+    List<Dictionary> getDictionaryById(Long id);
 }

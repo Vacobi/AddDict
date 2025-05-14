@@ -1,6 +1,7 @@
 package ru.vstu.adddict.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import ru.vstu.adddict.dto.*;
@@ -48,5 +49,15 @@ public class DictionaryController {
         DictionaryDto dictionaryDto = dictionaryService.updateDictionary(id, requestDto);
 
         return dictionaryMapper.toDictionaryResponseDto(dictionaryDto);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Object> deleteDictionary(
+            @PathVariable Long id,
+            @RequestAttribute("x-user-id") Long userId
+    ) {
+        dictionaryService.deleteDictionary(id, userId);
+
+        return ResponseEntity.noContent().build();
     }
 }

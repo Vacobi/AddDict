@@ -9,6 +9,7 @@ import org.springframework.test.context.ContextConfiguration;
 import ru.vstu.adddict.config.TestContainersConfig;
 import ru.vstu.adddict.dto.*;
 import ru.vstu.adddict.entity.Dictionary;
+import ru.vstu.adddict.exception.NotAllowedException;
 import ru.vstu.adddict.mapper.DictionaryMapper;
 import ru.vstu.adddict.repository.DictionariesRepository;
 import ru.vstu.adddict.testutils.ClearableTest;
@@ -166,6 +167,84 @@ class DictionaryServiceTest {
             DictionaryDto actualDtoInRepos = dictionaryMapper.toDto(dictionariesRepository.findById(dictionaryId).get());
             assertDictionariesDtoEquals(expDto, actualDtoInRepos);
             assertEquals(countOfDictionariesInReposBeforeUpdate, countOfDictionariesInReposAfterUpdate);
+        }
+    }
+
+    @Nested
+    class DeleteDictionaryTest extends ClearableTest {
+        DictionaryDto generateDictionaryToRepos(Long authorId) {
+
+            String name = "test";
+            String description = "test description";
+            boolean isPublic = true;
+            CreateDictionaryRequestDto createDictionaryRequestDto = CreateDictionaryRequestDto.builder()
+                    .name(name)
+                    .description(description)
+                    .isPublic(isPublic)
+                    .authorId(authorId)
+                    .build();
+
+            return dictionaryService.createDictionary(createDictionaryRequestDto);
+        }
+
+        @Test
+        void deleteDictionaryByAuthor() {
+            final Long authorId = 1L;
+            LocalDateTime now = LocalDateTime.now();
+
+            Dictionary dictionaryToPersist = Dictionary.builder()
+                    .name("test")
+                    .description("test description")
+                    .isPublic(true)
+                    .createdAt(now)
+                    .authorId(authorId)
+                    .build();
+
+            Dictionary persistedDictionary = dictionariesRepository.save(dictionaryToPersist);
+            final Long dictionaryId = persistedDictionary.getId();
+
+
+            boolean expectedDeleted = true;
+
+
+            long countOfDictionariesInReposBeforeUpdate = dictionariesRepository.count();
+            boolean actualDeleted = dictionaryService.deleteDictionary(dictionaryId, authorId);
+            long countOfDictionariesInReposAfterUpdate = dictionariesRepository.count();
+
+
+            assertEquals(expectedDeleted, actualDeleted);
+            assertEquals(countOfDictionariesInReposBeforeUpdate - 1, countOfDictionariesInReposAfterUpdate);
+            assertEquals(0, dictionariesRepository.getDictionaryById(dictionaryId).size());
+        }
+
+        @Test
+        void deleteDictionaryByOtherUser() {
+            final Long authorId = 1L;
+            LocalDateTime now = LocalDateTime.now();
+
+            Dictionary dictionaryToPersist = Dictionary.builder()
+                    .name("test")
+                    .description("test description")
+                    .isPublic(true)
+                    .createdAt(now)
+                    .authorId(authorId)
+                    .build();
+
+            Dictionary persistedDictionary = dictionariesRepository.save(dictionaryToPersist);
+            final Long dictionaryId = persistedDictionary.getId();
+            final Long requestSenderId = 2L;
+
+
+            long countOfDictionariesInReposBeforeUpdate = dictionariesRepository.count();
+            assertThrows(
+                    NotAllowedException.class,
+                    () -> dictionaryService.deleteDictionary(dictionaryId, requestSenderId)
+            );
+            long countOfDictionariesInReposAfterUpdate = dictionariesRepository.count();
+
+
+            assertEquals(countOfDictionariesInReposBeforeUpdate, countOfDictionariesInReposAfterUpdate);
+            assertEquals(1, dictionariesRepository.getDictionaryById(dictionaryId).size());
         }
     }
 }

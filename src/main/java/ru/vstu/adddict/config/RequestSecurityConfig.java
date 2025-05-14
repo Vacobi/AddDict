@@ -31,6 +31,7 @@ public class RequestSecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/dictionaries").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/dictionaries/{id}").permitAll()
                         .requestMatchers(HttpMethod.PUT, "/api/v1/dictionaries/{id}").permitAll()
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/dictionaries/{id}").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated()
                 )
