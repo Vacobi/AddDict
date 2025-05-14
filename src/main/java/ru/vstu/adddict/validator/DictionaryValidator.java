@@ -58,6 +58,14 @@ public class DictionaryValidator {
     public List<ValidationException> validateName(String name) {
         List<ValidationException> exceptions = new LinkedList<>();
 
+        if (name == null) {
+            String exceptionDescription =
+                    "Name of dictionary is empty";
+
+            exceptions.add(new ValidationException(exceptionDescription, ClientExceptionName.INVALID_DICTIONARY_NAME));
+            return exceptions;
+        }
+
         if (name.length() > nameLength) {
             String exceptionDescription =
                     "Max length of dictionary name is " + nameLength + " symbols.";
@@ -70,6 +78,14 @@ public class DictionaryValidator {
 
     public List<ValidationException> validateDescription(String description) {
         List<ValidationException> exceptions = new LinkedList<>();
+
+        if (description == null) {
+            String exceptionDescription =
+                    "Description of dictionary is empty.";
+
+            exceptions.add(new ValidationException(exceptionDescription, ClientExceptionName.INVALID_DICTIONARY_DESCRIPTION));
+            return exceptions;
+        }
 
         if (description.length() > descriptionLength) {
             String exceptionDescription =
