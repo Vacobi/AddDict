@@ -43,7 +43,7 @@ public class DictionaryService {
 
     @Transactional // For caching in future
     public DictionaryDto getDictionary(GetDictionaryRequestDto getDictionaryRequestDto) {
-        Optional<Dictionary> dictionaryInRepos = dictionariesRepository.findById(getDictionaryRequestDto.getId());
+        Optional<Dictionary> dictionaryInRepos = getDictionary(getDictionaryRequestDto.getId());
 
         if (dictionaryInRepos.isEmpty()) {
             throw new DictionaryNonExistException(getDictionaryRequestDto.getId());
@@ -95,5 +95,9 @@ public class DictionaryService {
         } catch (NoSuchElementException e) {
             throw new DictionaryNonExistException(dictionaryId);
         }
+    }
+
+    private Optional<Dictionary> getDictionary(Long id) {
+        return dictionariesRepository.findById(id);
     }
 }
