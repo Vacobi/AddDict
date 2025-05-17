@@ -3,10 +3,7 @@ package ru.vstu.adddict.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import ru.vstu.adddict.dto.CreateTranslationRequestDto;
-import ru.vstu.adddict.dto.GetTranslationRequestDto;
-import ru.vstu.adddict.dto.TranslationDto;
-import ru.vstu.adddict.dto.TranslationResponseDto;
+import ru.vstu.adddict.dto.*;
 import ru.vstu.adddict.mapper.TranslationMapper;
 import ru.vstu.adddict.service.TranslationService;
 
@@ -48,5 +45,31 @@ public class TranslationController {
         TranslationDto translationDto = translationService.createTranslation(requestDto);
 
         return translationMapper.toTranslationResponseDto(translationDto);
+    }
+
+    @GetMapping()
+    public GetDictionaryTranslationsResponseDto<TranslationResponseDto> getTranslations(
+            @PathVariable Long dictionaryId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestAttribute(value = "x-user-id", required = false) Long userId
+    ) {
+        GetDictionaryTranslationsRequestDto requestDto = GetDictionaryTranslationsRequestDto.builder()
+                .dictionaryId(dictionaryId)
+                .userId(userId)
+                .page(page)
+                .build();
+
+        GetDictionaryTranslationsResponseDto<TranslationDto> translationsInDictionaryDto
+                = translationService.getTranslations(requestDto);
+
+        PageResponseDto<TranslationResponseDto> pageResponse = translationMapper.fromPageResponseDto(
+                translationsInDictionaryDto.getPage(),
+                translationMapper::toTranslationResponseDto
+        );
+
+        return GetDictionaryTranslationsResponseDto.<TranslationResponseDto>builder()
+                .dictionaryId(translationsInDictionaryDto.getDictionaryId())
+                .page(pageResponse)
+                .build();
     }
 }
