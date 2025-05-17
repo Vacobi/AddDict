@@ -42,7 +42,7 @@ public class TranslationService {
                     + ". This dictionary is private and belongs to other user.");
         }
 
-        Optional<Translation> optionalTranslationInRepos = getTranslation(getDictionaryRequestDto.getTranslationId(), userId);
+        Optional<Translation> optionalTranslationInRepos = getTranslation(getDictionaryRequestDto.getTranslationId(), getDictionaryRequestDto.getDictionaryId());
 
         if (optionalTranslationInRepos.isEmpty()) {
             throw new TranslationNonExistException(getDictionaryRequestDto.getDictionaryId(), getDictionaryRequestDto.getTranslationId());
