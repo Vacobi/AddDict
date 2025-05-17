@@ -14,7 +14,9 @@ import ru.vstu.adddict.dto.dictionary.GetDictionaryTranslationsResponseDto;
 import ru.vstu.adddict.dto.translation.CreateTranslationRequestDto;
 import ru.vstu.adddict.dto.translation.GetTranslationRequestDto;
 import ru.vstu.adddict.dto.translation.TranslationDto;
+import ru.vstu.adddict.dto.translation.UpdateTranslationRequestDto;
 import ru.vstu.adddict.entity.translation.Translation;
+import ru.vstu.adddict.exception.DictionaryNonExistException;
 import ru.vstu.adddict.exception.NotAllowedException;
 import ru.vstu.adddict.exception.TranslationNonExistException;
 import ru.vstu.adddict.mapper.TranslationMapper;
@@ -22,6 +24,7 @@ import ru.vstu.adddict.repository.TranslationRepository;
 import ru.vstu.adddict.validator.TranslationValidator;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
@@ -78,6 +81,38 @@ public class TranslationService {
         Translation savedTranslation = translationRepository.save(translation);
 
         return translationMapper.toTranslationDto(savedTranslation);
+    }
+
+    @Transactional
+    public TranslationDto updateTranslation(UpdateTranslationRequestDto updateTranslationRequestDto, Long dictionaryId, Long translationId) {
+        if (forbiddenToChangeByUser(dictionaryId, updateTranslationRequestDto.getRequestSenderId())) {
+            throw new NotAllowedException("Can't update translation in dictionary with id: "
+                    + dictionaryId
+                    + ". This dictionary belongs to other user.");
+        }
+
+        translationValidator.validateUpdateTranslationRequest(updateTranslationRequestDto).ifPresent(e -> {
+            throw e;
+        });
+
+        TranslationDto translationDto = updateTranslationInRepository(updateTranslationRequestDto, dictionaryId, translationId);
+
+        return translationDto;
+    }
+
+    private TranslationDto updateTranslationInRepository(UpdateTranslationRequestDto updateTranslationRequestDto, Long dictionaryId, Long translationId) {
+        try {
+            Translation updated = translationRepository.updateWithLock(
+                    updateTranslationRequestDto.getRequestSenderId(),
+                    persisted -> {
+                        persisted = translationMapper.fromUpdateRequest(persisted, updateTranslationRequestDto);
+                        return persisted;
+                    });
+
+            return translationMapper.toTranslationDto(updated);
+        } catch (NoSuchElementException e) {
+            throw new DictionaryNonExistException(dictionaryId);
+        }
     }
 
     @Transactional
