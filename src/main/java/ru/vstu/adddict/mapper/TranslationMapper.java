@@ -4,10 +4,10 @@ import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
-import ru.vstu.adddict.dto.CreateTranslationRequestDto;
+import ru.vstu.adddict.dto.translation.CreateTranslationRequestDto;
 import ru.vstu.adddict.dto.PageResponseDto;
-import ru.vstu.adddict.dto.TranslationDto;
-import ru.vstu.adddict.dto.TranslationResponseDto;
+import ru.vstu.adddict.dto.translation.TranslationDto;
+import ru.vstu.adddict.dto.translation.TranslationResponseDto;
 import ru.vstu.adddict.entity.Translation;
 
 import java.time.LocalDateTime;

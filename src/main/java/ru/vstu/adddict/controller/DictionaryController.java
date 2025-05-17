@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import ru.vstu.adddict.dto.*;
+import ru.vstu.adddict.dto.dictionary.*;
 import ru.vstu.adddict.mapper.DictionaryMapper;
 import ru.vstu.adddict.service.DictionaryService;
 

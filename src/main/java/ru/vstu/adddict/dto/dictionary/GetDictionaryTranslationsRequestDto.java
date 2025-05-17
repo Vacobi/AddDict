@@ -1,4 +1,4 @@
-package ru.vstu.adddict.dto;
+package ru.vstu.adddict.dto.dictionary;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder(toBuilder = true)
-public class GetDictionaryTranslationsResponseDto<D> {
+public class GetDictionaryTranslationsRequestDto {
     private Long dictionaryId;
-    private PageResponseDto<D> page;
+    private Long userId;
+    private int page;
 }

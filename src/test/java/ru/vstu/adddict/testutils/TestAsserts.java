@@ -1,7 +1,7 @@
 package ru.vstu.adddict.testutils;
 
-import ru.vstu.adddict.dto.DictionaryDto;
-import ru.vstu.adddict.dto.TranslationDto;
+import ru.vstu.adddict.dto.dictionary.DictionaryDto;
+import ru.vstu.adddict.dto.translation.TranslationDto;
 
 import java.time.LocalDateTime;
 

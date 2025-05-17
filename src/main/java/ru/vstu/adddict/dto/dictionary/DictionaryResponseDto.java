@@ -1,4 +1,4 @@
-package ru.vstu.adddict.dto;
+package ru.vstu.adddict.dto.dictionary;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

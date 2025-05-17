@@ -4,6 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import ru.vstu.adddict.dto.*;
+import ru.vstu.adddict.dto.dictionary.GetDictionaryTranslationsRequestDto;
+import ru.vstu.adddict.dto.dictionary.GetDictionaryTranslationsResponseDto;
+import ru.vstu.adddict.dto.translation.CreateTranslationRequestDto;
+import ru.vstu.adddict.dto.translation.GetTranslationRequestDto;
+import ru.vstu.adddict.dto.translation.TranslationDto;
+import ru.vstu.adddict.dto.translation.TranslationResponseDto;
 import ru.vstu.adddict.mapper.TranslationMapper;
 import ru.vstu.adddict.service.TranslationService;
 

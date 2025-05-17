@@ -1,4 +1,4 @@
-package ru.vstu.adddict.dto;
+package ru.vstu.adddict.dto.translation;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,9 +9,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder(toBuilder = true)
-public class CreateTranslationRequestDto {
+public class TranslationDto {
+    private Long id;
     private String originText;
     private String translationText;
     private Long dictionaryId;
-    private Long requestSenderId;
 }

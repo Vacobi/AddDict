@@ -2,8 +2,8 @@ package ru.vstu.adddict.validator;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-import ru.vstu.adddict.dto.CreateDictionaryRequestDto;
-import ru.vstu.adddict.dto.UpdateDictionaryRequestDto;
+import ru.vstu.adddict.dto.dictionary.CreateDictionaryRequestDto;
+import ru.vstu.adddict.dto.dictionary.UpdateDictionaryRequestDto;
 import ru.vstu.adddict.exception.ClientExceptionName;
 import ru.vstu.adddict.exception.GroupValidationException;
 import ru.vstu.adddict.exception.ValidationException;
