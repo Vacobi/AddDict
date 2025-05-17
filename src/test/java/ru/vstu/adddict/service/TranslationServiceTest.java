@@ -17,6 +17,7 @@ import ru.vstu.adddict.entity.translation.Translation;
 import ru.vstu.adddict.exception.NotAllowedException;
 import ru.vstu.adddict.mapper.TranslationMapper;
 import ru.vstu.adddict.repository.TranslationRepository;
+import ru.vstu.adddict.testutils.ClearableTest;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static ru.vstu.adddict.testutils.TestAsserts.assertTranslationsDtoEquals;
@@ -24,7 +25,7 @@ import static ru.vstu.adddict.testutils.TestAsserts.assertTranslationsDtoEquals;
 @SpringBootTest
 @ContextConfiguration(initializers = TestContainersConfig.class)
 @Slf4j
-class TranslationServiceTest {
+class TranslationServiceTest extends ClearableTest {
 
     @Autowired
     private TranslationService translationService;
