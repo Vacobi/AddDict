@@ -169,7 +169,7 @@ public class TranslationService {
         try {
             dictionary = dictionaryService.getDictionary(dictionaryRequestDto);
         } catch (NotAllowedException e) {
-            return false;
+            return true;
         }
 
         return !dictionary.isOwner(userId);
