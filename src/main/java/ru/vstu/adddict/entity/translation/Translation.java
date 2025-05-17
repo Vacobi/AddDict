@@ -1,4 +1,4 @@
-package ru.vstu.adddict.entity;
+package ru.vstu.adddict.entity.translation;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

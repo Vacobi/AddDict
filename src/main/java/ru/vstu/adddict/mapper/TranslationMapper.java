@@ -8,7 +8,7 @@ import ru.vstu.adddict.dto.translation.CreateTranslationRequestDto;
 import ru.vstu.adddict.dto.PageResponseDto;
 import ru.vstu.adddict.dto.translation.TranslationDto;
 import ru.vstu.adddict.dto.translation.TranslationResponseDto;
-import ru.vstu.adddict.entity.Translation;
+import ru.vstu.adddict.entity.translation.Translation;
 
 import java.time.LocalDateTime;
 import java.util.function.Function;

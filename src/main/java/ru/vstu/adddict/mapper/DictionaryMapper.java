@@ -8,8 +8,8 @@ import ru.vstu.adddict.dto.dictionary.CreateDictionaryRequestDto;
 import ru.vstu.adddict.dto.dictionary.DictionaryDto;
 import ru.vstu.adddict.dto.dictionary.DictionaryResponseDto;
 import ru.vstu.adddict.dto.dictionary.UpdateDictionaryRequestDto;
-import ru.vstu.adddict.entity.BaseDictionary;
-import ru.vstu.adddict.entity.Dictionary;
+import ru.vstu.adddict.entity.dictionary.BaseDictionary;
+import ru.vstu.adddict.entity.dictionary.Dictionary;
 
 import java.time.LocalDateTime;
 

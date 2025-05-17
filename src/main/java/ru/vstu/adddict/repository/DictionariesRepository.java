@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import ru.vstu.adddict.entity.Dictionary;
+import ru.vstu.adddict.entity.dictionary.Dictionary;
 
 import java.util.List;
 import java.util.NoSuchElementException;

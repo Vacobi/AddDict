@@ -1,4 +1,4 @@
-package ru.vstu.adddict.entity;
+package ru.vstu.adddict.entity.dictionary;
 
 import java.time.LocalDateTime;
 import java.util.Objects;

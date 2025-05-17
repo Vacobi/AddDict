@@ -12,7 +12,7 @@ import ru.vstu.adddict.dto.dictionary.DictionaryDto;
 import ru.vstu.adddict.dto.translation.CreateTranslationRequestDto;
 import ru.vstu.adddict.dto.translation.GetTranslationRequestDto;
 import ru.vstu.adddict.dto.translation.TranslationDto;
-import ru.vstu.adddict.entity.Translation;
+import ru.vstu.adddict.entity.translation.Translation;
 import ru.vstu.adddict.exception.NotAllowedException;
 import ru.vstu.adddict.mapper.TranslationMapper;
 import ru.vstu.adddict.repository.TranslationRepository;

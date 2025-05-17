@@ -1,4 +1,4 @@
-package ru.vstu.adddict.entity;
+package ru.vstu.adddict.entity.dictionary;
 
 import jakarta.persistence.*;
 import lombok.*;

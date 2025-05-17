@@ -8,7 +8,7 @@ import ru.vstu.adddict.dto.dictionary.CreateDictionaryRequestDto;
 import ru.vstu.adddict.dto.dictionary.DictionaryDto;
 import ru.vstu.adddict.dto.dictionary.GetDictionaryRequestDto;
 import ru.vstu.adddict.dto.dictionary.UpdateDictionaryRequestDto;
-import ru.vstu.adddict.entity.Dictionary;
+import ru.vstu.adddict.entity.dictionary.Dictionary;
 import ru.vstu.adddict.exception.DictionaryNonExistException;
 import ru.vstu.adddict.exception.NotAllowedException;
 import ru.vstu.adddict.mapper.DictionaryMapper;
