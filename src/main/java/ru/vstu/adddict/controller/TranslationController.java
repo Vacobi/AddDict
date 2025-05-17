@@ -2,13 +2,51 @@ package ru.vstu.adddict.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import ru.vstu.adddict.dto.CreateTranslationRequestDto;
+import ru.vstu.adddict.dto.GetTranslationRequestDto;
+import ru.vstu.adddict.dto.TranslationDto;
+import ru.vstu.adddict.dto.TranslationResponseDto;
+import ru.vstu.adddict.mapper.TranslationMapper;
+import ru.vstu.adddict.service.TranslationService;
 
 @Controller
 @RestController
-@RequestMapping("api/v1/translations")
+@RequestMapping("api/v1/dictionaries/{dictionaryId}/words")
 @RequiredArgsConstructor
 public class TranslationController {
 
+    private final TranslationService translationService;
+
+    private final TranslationMapper translationMapper;
+
+    @GetMapping("/{translationId}")
+    public TranslationResponseDto getTranslation(
+            @PathVariable Long dictionaryId,
+            @PathVariable Long translationId,
+            @RequestAttribute(value = "x-user-id", required = false) Long userId
+    ) {
+        GetTranslationRequestDto requestDto = GetTranslationRequestDto.builder()
+                .dictionaryId(dictionaryId)
+                .translationId(translationId)
+                .build();
+
+        TranslationDto translationDto = translationService.getTranslation(requestDto, userId);
+
+        return translationMapper.toTranslationResponseDto(translationDto);
+    }
+
+    @PostMapping
+    public TranslationResponseDto createTranslation(
+            @RequestBody CreateTranslationRequestDto requestDto,
+            @PathVariable Long dictionaryId,
+            @RequestAttribute(value = "x-user-id") Long userId
+    ) {
+        requestDto.setDictionaryId(dictionaryId);
+        requestDto.setRequestSenderId(userId);
+
+        TranslationDto translationDto = translationService.createTranslation(requestDto);
+
+        return translationMapper.toTranslationResponseDto(translationDto);
+    }
 }

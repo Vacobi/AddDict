@@ -32,6 +32,8 @@ public class RequestSecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/dictionaries/{id}").permitAll()
                         .requestMatchers(HttpMethod.PUT, "/api/v1/dictionaries/{id}").permitAll()
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/dictionaries/{id}").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/dictionaries/{dictionaryId}/words/{translationId}").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/dictionaries/{dictionaryId}/words").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated()
                 )
