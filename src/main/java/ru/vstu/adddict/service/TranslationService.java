@@ -3,6 +3,8 @@ package ru.vstu.adddict.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.vstu.adddict.dto.*;
 import ru.vstu.adddict.entity.Translation;
@@ -12,6 +14,7 @@ import ru.vstu.adddict.mapper.TranslationMapper;
 import ru.vstu.adddict.repository.TranslationRepository;
 import ru.vstu.adddict.validator.TranslationValidator;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -26,6 +29,8 @@ public class TranslationService {
     private final TranslationMapper translationMapper;
 
     private final DictionaryService dictionaryService;
+
+    private final int translationsPageSize;
 
     @Transactional
     public TranslationDto getTranslation(GetTranslationRequestDto getDictionaryRequestDto, Long userId) {
@@ -66,6 +71,41 @@ public class TranslationService {
         Translation savedTranslation = translationRepository.save(translation);
 
         return translationMapper.toTranslationDto(savedTranslation);
+    }
+
+    @Transactional
+    public GetDictionaryTranslationsResponseDto<TranslationDto> getTranslations(GetDictionaryTranslationsRequestDto requestDto) {
+        translationValidator.validateGetDictionaryTranslationsRequestDto(requestDto).ifPresent(e -> {
+            throw e;
+        });
+
+        if (forbiddenToGetByUser(requestDto.getDictionaryId(), requestDto.getUserId())) {
+            throw new NotAllowedException("Can't get translations in dictionary with id: "
+                    + requestDto.getDictionaryId()
+                    + ". This dictionary is private and belongs to other user.");
+        }
+
+        Page<Translation> page = getTranslationsPageByDictionaryId(requestDto.getDictionaryId(), requestDto.getPage());
+
+        List<TranslationDto> translations = page
+                .stream()
+                .map(translationMapper::toTranslationDto)
+                .toList();
+
+        return GetDictionaryTranslationsResponseDto.<TranslationDto>builder()
+                .dictionaryId(requestDto.getDictionaryId())
+                .page(PageResponseDto.<TranslationDto>builder()
+                        .content(translations)
+                        .page(page.getNumber())
+                        .pageSize(translations.size())
+                        .totalElements(page.getTotalElements())
+                        .totalPages(page.getTotalPages())
+                        .build()
+                ).build();
+    }
+
+    private Page<Translation> getTranslationsPageByDictionaryId(long dictionaryId, int page) {
+        return translationRepository.findTranslationsByDictionaryId(dictionaryId, PageRequest.of(page, translationsPageSize));
     }
 
     private boolean forbiddenToGetByUser(Long dictId, Long userId) {
