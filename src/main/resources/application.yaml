@@ -23,6 +23,12 @@ spring:
     description:
       length: 256
 
+  translation-validation-rule:
+    origin-text:
+      length: 128
+    translation-text:
+      length: 128
+
   data:
     redis:
       host: ${SPRING_REDIS_HOST:localhost}
