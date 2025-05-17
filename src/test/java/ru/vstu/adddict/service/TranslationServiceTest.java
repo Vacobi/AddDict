@@ -12,9 +12,11 @@ import ru.vstu.adddict.dto.DictionaryDto;
 import ru.vstu.adddict.dto.GetTranslationRequestDto;
 import ru.vstu.adddict.dto.TranslationDto;
 import ru.vstu.adddict.entity.Translation;
+import ru.vstu.adddict.exception.NotAllowedException;
 import ru.vstu.adddict.mapper.TranslationMapper;
 import ru.vstu.adddict.repository.TranslationRepository;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static ru.vstu.adddict.testutils.TestAsserts.assertTranslationsDtoEquals;
 
 @SpringBootTest
@@ -75,6 +77,38 @@ class TranslationServiceTest {
             TranslationDto actualDto = translationService.getTranslation(requestDto, authorId);
 
             assertTranslationsDtoEquals(expectedDto, actualDto);
+        }
+
+        @Test
+        void getTranslationFromPrivateDictionaryOfOtherOwnerDictionary() {
+            Long authorId = 1L;
+            CreateDictionaryRequestDto createDictionaryRequestDto = CreateDictionaryRequestDto.builder()
+                    .name("Test 1")
+                    .description("Test description 1")
+                    .isPublic(false)
+                    .authorId(authorId)
+                    .build();
+            DictionaryDto dictionaryDto = dictionaryService.createDictionary(createDictionaryRequestDto);
+            Long dictionaryId = dictionaryDto.getId();
+
+            Long translationId = 1L;
+            String translationText = "Test translation 1";
+            String originalText = "Origin translation 1";
+            Translation translation = Translation.builder()
+                    .id(translationId)
+                    .translationText(translationText)
+                    .originText(originalText)
+                    .dictionaryId(dictionaryId)
+                    .build();
+            translationRepository.save(translation);
+
+            GetTranslationRequestDto requestDto = GetTranslationRequestDto.builder()
+                    .translationId(translationId)
+                    .dictionaryId(dictionaryId)
+                    .build();
+
+            Long requestSenderId = 2L;
+            assertThrows(NotAllowedException.class, () -> translationService.getTranslation(requestDto, requestSenderId));
         }
     }
 }
