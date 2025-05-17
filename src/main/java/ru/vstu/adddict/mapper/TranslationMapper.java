@@ -8,6 +8,8 @@ import ru.vstu.adddict.dto.translation.CreateTranslationRequestDto;
 import ru.vstu.adddict.dto.PageResponseDto;
 import ru.vstu.adddict.dto.translation.TranslationDto;
 import ru.vstu.adddict.dto.translation.TranslationResponseDto;
+import ru.vstu.adddict.dto.translation.UpdateTranslationRequestDto;
+import ru.vstu.adddict.entity.translation.BaseTranslation;
 import ru.vstu.adddict.entity.translation.Translation;
 
 import java.time.LocalDateTime;
@@ -41,6 +43,18 @@ public interface TranslationMapper {
                                 .collect(Collectors.toList())
                 )
                 .build();
+    }
+
+    default <T extends BaseTranslation> T fromUpdateRequest(T persisted, UpdateTranslationRequestDto updateRequest) {
+        if (updateRequest.getOriginText() != null) {
+            persisted.setOriginText(updateRequest.getOriginText());
+        }
+
+        if (updateRequest.getTranslationText() != null) {
+            persisted.setTranslationText(updateRequest.getTranslationText());
+        }
+
+        return persisted;
     }
 }
 
