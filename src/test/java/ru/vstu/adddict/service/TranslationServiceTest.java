@@ -106,4 +106,55 @@ class TranslationServiceTest {
             assertThrows(NotAllowedException.class, () -> translationService.getTranslation(requestDto, requestSenderId));
         }
     }
+
+    @Nested
+    class CreateTranslation {
+
+        @Test
+        void createTranslationInOwnDictionary() {
+            Long authorId = 1L;
+            DictionaryDto dictionaryDto = createDictionary(true, authorId);
+
+            String originalText = "Origin translation 1";
+            String translationText = "Origin translation 1";
+            Long dictionaryId = dictionaryDto.getId();
+            Long requestSenderId = 1L;
+            CreateTranslationRequestDto requestDto = CreateTranslationRequestDto.builder()
+                    .originText(originalText)
+                    .translationText(translationText)
+                    .dictionaryId(dictionaryId)
+                    .requestSenderId(requestSenderId)
+                    .build();
+
+            TranslationDto actualDto = translationService.createTranslation(requestDto);
+
+            TranslationDto expectedDto = TranslationDto.builder()
+                    .id(actualDto.getId())
+                    .translationText(translationText)
+                    .originText(originalText)
+                    .dictionaryId(dictionaryId)
+                    .build();
+
+            assertTranslationsDtoEquals(expectedDto, actualDto);
+        }
+
+        @Test
+        void createTranslationInNonOwnedDictionary() {
+            Long authorId = 1L;
+            DictionaryDto dictionaryDto = createDictionary(true, authorId);
+
+            String originalText = "Origin translation 1";
+            String translationText = "Origin translation 1";
+            Long dictionaryId = dictionaryDto.getId();
+            Long requestSenderId = 2L;
+            CreateTranslationRequestDto requestDto = CreateTranslationRequestDto.builder()
+                    .originText(originalText)
+                    .translationText(translationText)
+                    .dictionaryId(dictionaryId)
+                    .requestSenderId(requestSenderId)
+                    .build();
+
+            assertThrows(NotAllowedException.class, () -> translationService.createTranslation(requestDto));
+        }
+    }
 }
