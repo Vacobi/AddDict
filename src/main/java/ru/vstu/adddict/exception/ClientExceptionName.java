@@ -13,6 +13,9 @@ public enum ClientExceptionName {
     DICTIONARY_NOT_FOUND(350),
 
     NOT_ALLOWED(400);
+    NOT_ALLOWED(400),
+
+    TRANSLATION_NOT_FOUND(250);
 
     private final int apiErrorCode;
 
