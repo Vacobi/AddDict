@@ -1,6 +1,7 @@
 package ru.vstu.adddict.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import ru.vstu.adddict.dto.*;
@@ -86,5 +87,16 @@ public class TranslationController {
         TranslationDto translationDto = translationService.updateTranslation(requestDto, dictionaryId, userId);
 
         return translationMapper.toTranslationResponseDto(translationDto);
+    }
+
+    @DeleteMapping("/{translationId}")
+    public ResponseEntity<Object> deleteDictionary(
+            @PathVariable Long dictionaryId,
+            @PathVariable Long translationId,
+            @RequestAttribute("x-user-id") Long userId
+    ) {
+        translationService.deleteTranslation(dictionaryId, translationId, userId);
+
+        return ResponseEntity.noContent().build();
     }
 }
