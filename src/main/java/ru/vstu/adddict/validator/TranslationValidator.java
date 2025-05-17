@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import ru.vstu.adddict.dto.translation.CreateTranslationRequestDto;
 import ru.vstu.adddict.dto.dictionary.GetDictionaryTranslationsRequestDto;
+import ru.vstu.adddict.dto.translation.UpdateTranslationRequestDto;
 import ru.vstu.adddict.exception.ClientExceptionName;
 import ru.vstu.adddict.exception.GroupValidationException;
 import ru.vstu.adddict.exception.ValidationException;
@@ -59,6 +60,26 @@ public class TranslationValidator {
         }
 
         return exceptions;
+    }
+
+    public Optional<GroupValidationException> validateUpdateTranslationRequest(UpdateTranslationRequestDto updateTranslationRequest) {
+        List<ValidationException> exceptions = new LinkedList<>();
+
+        if (updateTranslationRequest.isEmpty()) {
+            String exceptionDescription = "All fields in update request are not set.";
+            exceptions.add(new ValidationException(exceptionDescription, ClientExceptionName.EMPTY_UPDATE_TRANSLATION_REQUEST));
+            return Optional.of(new GroupValidationException(exceptions));
+        }
+
+        if (updateTranslationRequest.getOriginText() != null) {
+            exceptions.addAll(validateOriginText(updateTranslationRequest.getOriginText()));
+        }
+
+        if (updateTranslationRequest.getTranslationText() != null) {
+            exceptions.addAll(validateTranslatedText(updateTranslationRequest.getTranslationText()));
+        }
+
+        return exceptions.isEmpty() ? Optional.empty() : Optional.of(new GroupValidationException(exceptions));
     }
 
     public Optional<GroupValidationException> validateGetDictionaryTranslationsRequestDto(GetDictionaryTranslationsRequestDto request) {
