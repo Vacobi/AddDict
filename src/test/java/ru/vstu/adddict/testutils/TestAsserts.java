@@ -1,6 +1,7 @@
 package ru.vstu.adddict.testutils;
 
 import ru.vstu.adddict.dto.DictionaryDto;
+import ru.vstu.adddict.dto.TranslationDto;
 
 import java.time.LocalDateTime;
 
@@ -28,5 +29,12 @@ public class TestAsserts {
         } else {
             fail();
         }
+    }
+
+    public static void assertTranslationsDtoEquals(TranslationDto expected, TranslationDto actual) {
+        assertEquals(expected.getId(), actual.getId());
+        assertEquals(expected.getTranslationText(), actual.getTranslationText());
+        assertEquals(expected.getOriginText(), actual.getOriginText());
+        assertEquals(expected.getDictionaryId(), actual.getDictionaryId());
     }
 }
