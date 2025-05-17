@@ -80,7 +80,7 @@ public class DictionaryService {
 
         try {
             Dictionary updated = dictionariesRepository.updateWithLock(
-                    updateDictionaryRequestDto.getRequestSenderId(),
+                    dictionaryId,
                     persisted -> {
                         persisted = dictionaryMapper.fromUpdateRequest(persisted, updateDictionaryRequestDto);
                         if (!persisted.isDictionaryOwner(dictionaryId)) {
