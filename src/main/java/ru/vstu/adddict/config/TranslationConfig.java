@@ -13,6 +13,9 @@ public class TranslationConfig {
     @Value("${spring.translation-validation-rule.translation-text.length}")
     private int translationTextLength;
 
+    @Value("${spring.translation.translation-page-size}")
+    private int translationsPageSize;
+
     @Bean
     public int originTextLength() {
         return originTextLength;
@@ -21,5 +24,10 @@ public class TranslationConfig {
     @Bean
     public int translationTextLength() {
         return translationTextLength;
+    }
+
+    @Bean
+    public int translationsPageSize() {
+        return translationsPageSize;
     }
 }

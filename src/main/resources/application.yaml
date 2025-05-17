@@ -29,6 +29,9 @@ spring:
     translation-text:
       length: 128
 
+  translation:
+    translation-page-size: 20
+
   data:
     redis:
       host: ${SPRING_REDIS_HOST:localhost}
