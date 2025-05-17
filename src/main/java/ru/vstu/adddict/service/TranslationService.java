@@ -27,19 +27,9 @@ public class TranslationService {
 
     private final DictionaryService dictionaryService;
 
-    private boolean forbiddenToUser(Long dictId, Long userId) {
-        GetDictionaryRequestDto dictionaryRequestDto = GetDictionaryRequestDto.builder()
-                .id(dictId)
-                .requestSenderId(userId)
-                .build();
-        DictionaryDto dictionary = dictionaryService.getDictionary(dictionaryRequestDto);
-
-        return !dictionary.isOwner(userId);
-    }
-
     @Transactional
     public TranslationDto getTranslation(GetTranslationRequestDto getDictionaryRequestDto, Long userId) {
-        if (forbiddenToUser(getDictionaryRequestDto.getDictionaryId(), userId)) {
+        if (forbiddenToGetByUser(getDictionaryRequestDto.getDictionaryId(), userId)) {
             throw new NotAllowedException("Can't get translation in dictionary with id: "
                     + getDictionaryRequestDto.getDictionaryId()
                     + ". This dictionary is private and belongs to other user.");
@@ -66,7 +56,7 @@ public class TranslationService {
             throw e;
         });
 
-        if (forbiddenToUser(createTranslationRequestDto.getDictionaryId(), createTranslationRequestDto.getRequestSenderId())) {
+        if (forbiddenToChangeByUser(createTranslationRequestDto.getDictionaryId(), createTranslationRequestDto.getRequestSenderId())) {
             throw new NotAllowedException("Can't add translation to dictionary with id: "
                     + createTranslationRequestDto.getDictionaryId()
                     + ". This dictionary belongs to other user.");
@@ -76,5 +66,25 @@ public class TranslationService {
         Translation savedTranslation = translationRepository.save(translation);
 
         return translationMapper.toTranslationDto(savedTranslation);
+    }
+
+    private boolean forbiddenToGetByUser(Long dictId, Long userId) {
+        GetDictionaryRequestDto dictionaryRequestDto = GetDictionaryRequestDto.builder()
+                .id(dictId)
+                .requestSenderId(userId)
+                .build();
+        DictionaryDto dictionary = dictionaryService.getDictionary(dictionaryRequestDto);
+
+        return !dictionary.getIsPublic() && !dictionary.isOwner(userId);
+    }
+
+    private boolean forbiddenToChangeByUser(Long dictId, Long userId) {
+        GetDictionaryRequestDto dictionaryRequestDto = GetDictionaryRequestDto.builder()
+                .id(dictId)
+                .requestSenderId(userId)
+                .build();
+        DictionaryDto dictionary = dictionaryService.getDictionary(dictionaryRequestDto);
+
+        return !dictionary.isOwner(userId);
     }
 }
