@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import ru.vstu.adddict.entity.translation.Translation;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.function.UnaryOperator;
@@ -36,4 +37,6 @@ public interface TranslationRepository extends JpaRepository<Translation, Long> 
 
         return updated;
     }
+
+    List<Translation> getTranslationsById(Long id);
 }
