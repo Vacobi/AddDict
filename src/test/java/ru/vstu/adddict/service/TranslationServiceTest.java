@@ -19,6 +19,7 @@ import ru.vstu.adddict.mapper.TranslationMapper;
 import ru.vstu.adddict.repository.TranslationRepository;
 import ru.vstu.adddict.testutils.ClearableTest;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static ru.vstu.adddict.testutils.TestAsserts.assertTranslationsDtoEquals;
 
@@ -226,6 +227,50 @@ class TranslationServiceTest extends ClearableTest {
                     .build();
 
             assertThrows(NotAllowedException.class, () -> translationService.updateTranslation(requestDto, dictionaryId, translationId));
+        }
+    }
+
+    @Nested
+    class DeleteTranslation {
+
+        @Test
+        void deleteTranslationInOwnDictionary() {
+            Long authorId = 1L;
+            DictionaryDto dictionaryDto = createDictionary(true, authorId);
+            Long dictionaryId = dictionaryDto.getId();
+            TranslationDto translationDto = addTranslationInDictionary(dictionaryDto.getId());
+            Long translationId = translationDto.getId();
+            boolean expectedDeleted = true;
+
+            Long requestSenderId = 1L;
+
+            long translationsInReposBeforeDelete = translationRepository.count();
+            boolean actualDeleted = translationService.deleteTranslation(dictionaryId, translationId, requestSenderId);
+            long translationsInReposAfterDelete = translationRepository.count();
+
+            assertEquals(expectedDeleted, actualDeleted);
+            assertEquals(translationsInReposBeforeDelete - 1, translationsInReposAfterDelete);
+            assertEquals(0, translationRepository.getTranslationsById(translationId).size());
+        }
+
+        @Test
+        void deleteTranslationInNonOwnedDictionary() {
+            Long authorId = 1L;
+            DictionaryDto dictionaryDto = createDictionary(true, authorId);
+            Long dictionaryId = dictionaryDto.getId();
+            TranslationDto translationDto = addTranslationInDictionary(dictionaryDto.getId());
+            Long translationId = translationDto.getId();
+
+            Long requestSenderId = 2L;
+
+            long translationsInReposBeforeDelete = translationRepository.count();
+            assertThrows(NotAllowedException.class,
+                    () -> translationService.deleteTranslation(dictionaryId, translationId, requestSenderId)
+            );
+            long translationsInReposAfterDelete = translationRepository.count();
+
+            assertEquals(translationsInReposBeforeDelete, translationsInReposAfterDelete);
+            assertEquals(1, translationRepository.getTranslationsById(translationId).size());
         }
     }
 }
