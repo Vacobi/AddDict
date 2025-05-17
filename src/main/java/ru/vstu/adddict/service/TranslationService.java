@@ -115,6 +115,19 @@ public class TranslationService {
     }
 
     @Transactional
+    public boolean deleteTranslation(Long dictionaryId, Long translationId, Long userId) {
+        if (forbiddenToChangeByUser(dictionaryId, userId)) {
+            throw new NotAllowedException("Can't delete translation in dictionary with id: "
+                    + dictionaryId
+                    + ". This dictionary belongs to other user.");
+        }
+
+        translationRepository.deleteById(translationId);
+
+        return true;
+    }
+
+    @Transactional
     public GetDictionaryTranslationsResponseDto<TranslationDto> getTranslations(GetDictionaryTranslationsRequestDto requestDto) {
         translationValidator.validateGetDictionaryTranslationsRequestDto(requestDto).ifPresent(e -> {
             throw e;
