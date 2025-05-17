@@ -102,7 +102,7 @@ public class TranslationService {
     private TranslationDto updateTranslationInRepository(UpdateTranslationRequestDto updateTranslationRequestDto, Long dictionaryId, Long translationId) {
         try {
             Translation updated = translationRepository.updateWithLock(
-                    updateTranslationRequestDto.getRequestSenderId(),
+                    dictionaryId,
                     persisted -> {
                         persisted = translationMapper.fromUpdateRequest(persisted, updateTranslationRequestDto);
                         return persisted;
