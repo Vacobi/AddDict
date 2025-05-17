@@ -1,14 +1,39 @@
 package ru.vstu.adddict.repository;
 
+import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import ru.vstu.adddict.entity.translation.Translation;
 
+import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.function.UnaryOperator;
 
 public interface TranslationRepository extends JpaRepository<Translation, Long> {
     Optional<Translation> getTranslationsByIdAndDictionaryId(Long id, Long dictID);
 
     Page<Translation> findTranslationsByDictionaryId(Long dictionaryId, Pageable pageable);
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Lock(LockModeType.PESSIMISTIC_READ)
+    default Translation updateWithLock(Long id, UnaryOperator<Translation> modifier) {
+        return update(id, true, modifier);
+    }
+
+    private Translation update(Long id, boolean updateIfUnmodified, UnaryOperator<Translation> modifier) {
+
+        Translation dictionary = findById(id).orElseThrow(NoSuchElementException::new);
+
+        Translation updated = modifier.apply(dictionary);
+
+        if (updateIfUnmodified || !dictionary.equals(updated)) {
+            return save(updated);
+        }
+
+        return updated;
+    }
 }
