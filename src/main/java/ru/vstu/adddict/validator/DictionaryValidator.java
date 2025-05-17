@@ -40,7 +40,7 @@ public class DictionaryValidator {
 
         if (updateDictionaryRequestDto.isEmpty()) {
             String exceptionDescription = "All fields in update request are not set.";
-            exceptions.add(new ValidationException(exceptionDescription, ClientExceptionName.EMPTY_UPDATE_REQUEST));
+            exceptions.add(new ValidationException(exceptionDescription, ClientExceptionName.EMPTY_UPDATE_DICTIONARY_REQUEST));
             return Optional.of(new GroupValidationException(exceptions));
         }
 
