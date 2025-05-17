@@ -130,7 +130,13 @@ public class TranslationService {
                 .id(dictId)
                 .requestSenderId(userId)
                 .build();
-        DictionaryDto dictionary = dictionaryService.getDictionary(dictionaryRequestDto);
+
+        DictionaryDto dictionary;
+        try {
+            dictionary = dictionaryService.getDictionary(dictionaryRequestDto);
+        } catch (NotAllowedException e) {
+            return false;
+        }
 
         return !dictionary.isOwner(userId);
     }
