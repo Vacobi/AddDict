@@ -10,6 +10,7 @@ import ru.vstu.adddict.exception.NotAllowedException;
 import ru.vstu.adddict.exception.TranslationNonExistException;
 import ru.vstu.adddict.mapper.TranslationMapper;
 import ru.vstu.adddict.repository.TranslationRepository;
+import ru.vstu.adddict.validator.TranslationValidator;
 
 import java.util.Optional;
 
@@ -19,6 +20,8 @@ import java.util.Optional;
 public class TranslationService {
 
     private final TranslationRepository translationRepository;
+
+    private final TranslationValidator translationValidator;
 
     private final TranslationMapper translationMapper;
 
@@ -55,5 +58,23 @@ public class TranslationService {
 
     private Optional<Translation> getTranslation(Long id, Long dictID) {
         return translationRepository.getTranslationsByIdAndDictionaryId(id, dictID);
+    }
+
+    @Transactional
+    public TranslationDto createTranslation(CreateTranslationRequestDto createTranslationRequestDto) {
+        translationValidator.validateCreateTranslationRequest(createTranslationRequestDto).ifPresent(e -> {
+            throw e;
+        });
+
+        if (forbiddenToUser(createTranslationRequestDto.getDictionaryId(), createTranslationRequestDto.getRequestSenderId())) {
+            throw new NotAllowedException("Can't add translation to dictionary with id: "
+                    + createTranslationRequestDto.getDictionaryId()
+                    + ". This dictionary belongs to other user.");
+        }
+
+        Translation translation = translationMapper.toTranslation(createTranslationRequestDto);
+        Translation savedTranslation = translationRepository.save(translation);
+
+        return translationMapper.toTranslationDto(savedTranslation);
     }
 }
