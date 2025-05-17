@@ -18,4 +18,8 @@ public class DictionaryDto {
     private Boolean isPublic;
     private LocalDateTime createdAt;
     private Long authorId;
+
+    public boolean isOwner(Long userId) {
+        return userId.equals(authorId);
+    }
 }
