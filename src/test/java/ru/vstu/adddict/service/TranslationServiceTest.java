@@ -72,16 +72,15 @@ class TranslationServiceTest extends ClearableTest {
             DictionaryDto dictionaryDto = createDictionary(true, authorId);
             Long dictionaryId = dictionaryDto.getId();
 
-            Long translationId = 1L;
             String translationText = "Test translation 1";
             String originalText = "Origin translation 1";
             Translation translation = Translation.builder()
-                    .id(translationId)
                     .translationText(translationText)
                     .originText(originalText)
                     .dictionaryId(dictionaryId)
                     .build();
-            translationRepository.save(translation);
+            Translation persisted = translationRepository.save(translation);
+            Long translationId = persisted.getId();
 
             GetTranslationRequestDto requestDto = GetTranslationRequestDto.builder()
                     .translationId(translationId)
@@ -106,16 +105,15 @@ class TranslationServiceTest extends ClearableTest {
             DictionaryDto dictionaryDto = createDictionary(false, authorId);
             Long dictionaryId = dictionaryDto.getId();
 
-            Long translationId = 1L;
             String translationText = "Test translation 1";
             String originalText = "Origin translation 1";
             Translation translation = Translation.builder()
-                    .id(translationId)
                     .translationText(translationText)
                     .originText(originalText)
                     .dictionaryId(dictionaryId)
                     .build();
-            translationRepository.save(translation);
+            Translation persisted = translationRepository.save(translation);
+            Long translationId = persisted.getId();
 
             GetTranslationRequestDto requestDto = GetTranslationRequestDto.builder()
                     .translationId(translationId)
