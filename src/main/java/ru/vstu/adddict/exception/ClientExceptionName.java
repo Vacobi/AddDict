@@ -12,9 +12,10 @@ public enum ClientExceptionName {
     EMPTY_UPDATE_REQUEST(320),
     DICTIONARY_NOT_FOUND(350),
 
-    NOT_ALLOWED(400);
     NOT_ALLOWED(400),
 
+    INVALID_ORIGIN_TRANSLATION_TEXT(200),
+    INVALID_TRANSLATION_TEXT(201),
     TRANSLATION_NOT_FOUND(250);
 
     private final int apiErrorCode;
