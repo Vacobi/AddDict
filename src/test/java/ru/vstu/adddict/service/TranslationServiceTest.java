@@ -48,6 +48,20 @@ class TranslationServiceTest {
         return dictionaryService.createDictionary(createDictionaryRequestDto);
     }
 
+    private TranslationDto addTranslationInDictionary(Long dictionaryId) {
+        String originalText = "Origin text 1";
+        String translationText = "Translation text 1";
+        Long requestSenderId = 1L;
+        CreateTranslationRequestDto requestDto = CreateTranslationRequestDto.builder()
+                .originText(originalText)
+                .translationText(translationText)
+                .dictionaryId(dictionaryId)
+                .requestSenderId(requestSenderId)
+                .build();
+
+        return translationService.createTranslation(requestDto);
+    }
+
     @Nested
     class GetTranslation {
 
@@ -165,20 +179,6 @@ class TranslationServiceTest {
 
     @Nested
     class UpdateTranslation {
-
-        private TranslationDto addTranslationInDictionary(Long dictionaryId) {
-            String originalText = "Origin text 1";
-            String translationText = "Translation text 1";
-            Long requestSenderId = 1L;
-            CreateTranslationRequestDto requestDto = CreateTranslationRequestDto.builder()
-                    .originText(originalText)
-                    .translationText(translationText)
-                    .dictionaryId(dictionaryId)
-                    .requestSenderId(requestSenderId)
-                    .build();
-
-            return translationService.createTranslation(requestDto);
-        }
 
         @Test
         void updateTranslationInOwnDictionary() {
