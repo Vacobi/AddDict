@@ -6,10 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.vstu.adddict.dto.*;
 import ru.vstu.adddict.dto.dictionary.GetDictionaryTranslationsRequestDto;
 import ru.vstu.adddict.dto.dictionary.GetDictionaryTranslationsResponseDto;
-import ru.vstu.adddict.dto.translation.CreateTranslationRequestDto;
-import ru.vstu.adddict.dto.translation.GetTranslationRequestDto;
-import ru.vstu.adddict.dto.translation.TranslationDto;
-import ru.vstu.adddict.dto.translation.TranslationResponseDto;
+import ru.vstu.adddict.dto.translation.*;
 import ru.vstu.adddict.mapper.TranslationMapper;
 import ru.vstu.adddict.service.TranslationService;
 
@@ -77,5 +74,17 @@ public class TranslationController {
                 .dictionaryId(translationsInDictionaryDto.getDictionaryId())
                 .page(pageResponse)
                 .build();
+    }
+
+    @PutMapping("/{translationId}")
+    public TranslationResponseDto updateTranslation(
+            @PathVariable Long dictionaryId,
+            @RequestBody UpdateTranslationRequestDto requestDto,
+            @RequestAttribute(value = "x-user-id") Long userId
+    ) {
+        requestDto.setRequestSenderId(userId);
+        TranslationDto translationDto = translationService.updateTranslation(requestDto, dictionaryId, userId);
+
+        return translationMapper.toTranslationResponseDto(translationDto);
     }
 }
