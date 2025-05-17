@@ -20,6 +20,6 @@ public class DictionaryDto {
     private Long authorId;
 
     public boolean isOwner(Long userId) {
-        return userId.equals(authorId);
+        return authorId.equals(userId);
     }
 }
