@@ -12,6 +12,7 @@ import ru.vstu.adddict.dto.dictionary.DictionaryDto;
 import ru.vstu.adddict.dto.translation.CreateTranslationRequestDto;
 import ru.vstu.adddict.dto.translation.GetTranslationRequestDto;
 import ru.vstu.adddict.dto.translation.TranslationDto;
+import ru.vstu.adddict.dto.translation.UpdateTranslationRequestDto;
 import ru.vstu.adddict.entity.translation.Translation;
 import ru.vstu.adddict.exception.NotAllowedException;
 import ru.vstu.adddict.mapper.TranslationMapper;
@@ -159,6 +160,73 @@ class TranslationServiceTest {
                     .build();
 
             assertThrows(NotAllowedException.class, () -> translationService.createTranslation(requestDto));
+        }
+    }
+
+    @Nested
+    class UpdateTranslation {
+
+        private TranslationDto addTranslationInDictionary(Long dictionaryId) {
+            String originalText = "Origin text 1";
+            String translationText = "Translation text 1";
+            Long requestSenderId = 1L;
+            CreateTranslationRequestDto requestDto = CreateTranslationRequestDto.builder()
+                    .originText(originalText)
+                    .translationText(translationText)
+                    .dictionaryId(dictionaryId)
+                    .requestSenderId(requestSenderId)
+                    .build();
+
+            return translationService.createTranslation(requestDto);
+        }
+
+        @Test
+        void updateTranslationInOwnDictionary() {
+            Long authorId = 1L;
+            DictionaryDto dictionaryDto = createDictionary(true, authorId);
+            Long dictionaryId = dictionaryDto.getId();
+            TranslationDto translationDto = addTranslationInDictionary(dictionaryDto.getId());
+            Long translationId = translationDto.getId();
+
+            String originalText = "Updated origin text";
+            String translationText = "Updated translation text";
+            Long requestSenderId = 1L;
+            UpdateTranslationRequestDto requestDto = UpdateTranslationRequestDto.builder()
+                    .originText(originalText)
+                    .translationText(translationText)
+                    .requestSenderId(requestSenderId)
+                    .build();
+
+            TranslationDto actualDto = translationService.updateTranslation(requestDto, dictionaryId, translationId);
+
+            TranslationDto expectedDto = TranslationDto.builder()
+                    .id(actualDto.getId())
+                    .translationText(translationText)
+                    .originText(originalText)
+                    .dictionaryId(dictionaryId)
+                    .build();
+
+            assertTranslationsDtoEquals(expectedDto, actualDto);
+        }
+
+        @Test
+        void updateTranslationInNonOwnedDictionary() {
+            Long authorId = 1L;
+            DictionaryDto dictionaryDto = createDictionary(true, authorId);
+            Long dictionaryId = dictionaryDto.getId();
+            TranslationDto translationDto = addTranslationInDictionary(dictionaryDto.getId());
+            Long translationId = translationDto.getId();
+
+            String originalText = "Updated origin text";
+            String translationText = "Updated translation text";
+            Long requestSenderId = 2L;
+            UpdateTranslationRequestDto requestDto = UpdateTranslationRequestDto.builder()
+                    .originText(originalText)
+                    .translationText(translationText)
+                    .requestSenderId(requestSenderId)
+                    .build();
+
+            assertThrows(NotAllowedException.class, () -> translationService.updateTranslation(requestDto, dictionaryId, translationId));
         }
     }
 }
