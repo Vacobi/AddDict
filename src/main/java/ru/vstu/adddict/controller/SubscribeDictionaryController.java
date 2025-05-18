@@ -1,6 +1,7 @@
 package ru.vstu.adddict.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import ru.vstu.adddict.dto.subscribedictionary.CreateSubscribeDictionaryRequestDto;
@@ -26,5 +27,15 @@ public class SubscribeDictionaryController {
         requestDto.setUserId(userId);
 
         return subscribeDictionaryMapper.toSubscribeDictionaryResponseDto(dictionarySubscribesService.subscribeDictionary(requestDto));
+    }
+
+    @DeleteMapping("/subscribe/{id}")
+    public ResponseEntity<Object> unsubscribeBySubscribeId(
+            @PathVariable Long id,
+            @RequestAttribute(value = "x-user-id") Long userId
+    ) {
+        dictionarySubscribesService.unsubscribeToDictionary(id, userId);
+
+        return ResponseEntity.noContent().build();
     }
 }
