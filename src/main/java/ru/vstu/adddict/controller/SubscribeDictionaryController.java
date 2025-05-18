@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import ru.vstu.adddict.dto.subscribedictionary.CreateSubscribeDictionaryRequestDto;
-import ru.vstu.adddict.dto.subscribedictionary.SubscribeDictionaryResponseDto;
+import ru.vstu.adddict.dto.PageResponseDto;
+import ru.vstu.adddict.dto.subscribedictionary.*;
 import ru.vstu.adddict.mapper.SubscribeDictionaryMapper;
 import ru.vstu.adddict.service.SubscribeDictionaryService;
 
@@ -47,5 +47,26 @@ public class SubscribeDictionaryController {
         dictionarySubscribesService.unsubscribeToDictionaryByDictionaryId(dictionaryId, userId);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/list/me")
+    public GetUserSubscribesDictionariesResponseDto<SubscribeDictionaryResponseDto> getMySubscribesForDictionaries(
+            @RequestAttribute("x-user-id") Long userId,
+            @RequestParam(defaultValue = "0") int page
+    ) {
+        GetUserSubscribesDictionariesResponseDto<SubscribeDictionaryDto> subscribes =
+                dictionarySubscribesService.getUserSubscribes(
+                        new GetUserSubscribesDictionariesRequestDto(userId, userId, page)
+                );
+
+        PageResponseDto<SubscribeDictionaryResponseDto> pageResponse = subscribeDictionaryMapper.fromPageResponseDto(
+                subscribes.getPage(),
+                subscribeDictionaryMapper::toSubscribeDictionaryResponseDto
+        );
+
+        return GetUserSubscribesDictionariesResponseDto.<SubscribeDictionaryResponseDto>builder()
+                .userId(subscribes.getUserId())
+                .page(pageResponse)
+                .build();
     }
 }
