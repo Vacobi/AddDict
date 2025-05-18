@@ -11,6 +11,8 @@ import ru.vstu.adddict.dto.dictionary.CreateDictionaryRequestDto;
 import ru.vstu.adddict.dto.dictionary.DictionaryDto;
 import ru.vstu.adddict.dto.subscribedictionary.CreateSubscribeDictionaryRequestDto;
 import ru.vstu.adddict.dto.subscribedictionary.SubscribeDictionaryDto;
+import ru.vstu.adddict.dto.translation.CreateTranslationRequestDto;
+import ru.vstu.adddict.dto.translation.TranslationDto;
 import ru.vstu.adddict.exception.NotAllowedException;
 import ru.vstu.adddict.mapper.SubscribeDictionaryMapper;
 import ru.vstu.adddict.repository.SubscribeDictionaryRepository;
@@ -35,6 +37,8 @@ class SubscribeDictionaryServiceTest extends ClearableTest {
 
     @Autowired
     private DictionaryService dictionaryService;
+    @Autowired
+    private TranslationService translationService;
 
     private DictionaryDto createDictionary(boolean isPublic, Long authorId) {
         CreateDictionaryRequestDto createDictionaryRequestDto = CreateDictionaryRequestDto.builder()
@@ -44,6 +48,29 @@ class SubscribeDictionaryServiceTest extends ClearableTest {
                 .authorId(authorId)
                 .build();
         return dictionaryService.createDictionary(createDictionaryRequestDto);
+    }
+
+    private TranslationDto addTranslationInDictionary(Long dictionaryId) {
+        String originalText = "Origin text 1";
+        String translationText = "Translation text 1";
+        Long requestSenderId = 1L;
+        CreateTranslationRequestDto requestDto = CreateTranslationRequestDto.builder()
+                .originText(originalText)
+                .translationText(translationText)
+                .dictionaryId(dictionaryId)
+                .requestSenderId(requestSenderId)
+                .build();
+
+        return translationService.createTranslation(requestDto);
+    }
+
+    private SubscribeDictionaryDto getSubscribeDictionary(Long dictionaryId, Long userId) {
+        CreateSubscribeDictionaryRequestDto requestDto = CreateSubscribeDictionaryRequestDto.builder()
+                .userId(userId)
+                .dictionaryId(dictionaryId)
+                .build();
+
+        return subscribeDictionaryService.subscribeDictionary(requestDto);
     }
 
     @Nested
@@ -97,6 +124,42 @@ class SubscribeDictionaryServiceTest extends ClearableTest {
                     .build();
 
             assertThrows(NotAllowedException.class, () -> subscribeDictionaryService.subscribeDictionary(requestDto));
+        }
+    }
+
+    @Nested
+    class UnsubscribeDictionaryTest {
+
+        @Test
+        void unsubscribeFromDictionary() {
+            DictionaryDto dictionaryDto = createDictionary(true, 9999L);
+            Long userId = 1L;
+            boolean expectedDeleted = true;
+
+            SubscribeDictionaryDto subscribeDictionaryDto = getSubscribeDictionary(dictionaryDto.getId(), userId);
+
+            long subscribesDictionariesCountBeforeDelete = subscribeDictionaryRepository.count();
+            boolean actualDeleted = subscribeDictionaryService.unsubscribeToDictionary(subscribeDictionaryDto.getId(), userId);
+            long subscribesDictionariesCountAfterDelete = subscribeDictionaryRepository.count();
+
+            assertEquals(expectedDeleted, actualDeleted);
+            assertEquals(subscribesDictionariesCountBeforeDelete - 1, subscribesDictionariesCountAfterDelete);
+            assertTrue(subscribeDictionaryRepository.findById(subscribeDictionaryDto.getId()).isEmpty());
+        }
+
+        @Test
+        void unsubscribeFromDictionaryByOtherUserRequest() {
+            DictionaryDto dictionaryDto = createDictionary(true, 9999L);
+            Long userId = 1L;
+
+            SubscribeDictionaryDto subscribeDictionaryDto = getSubscribeDictionary(dictionaryDto.getId(), userId);
+
+            long subscribesDictionariesCountBeforeDelete = subscribeDictionaryRepository.count();
+            assertThrows(NotAllowedException.class, () -> subscribeDictionaryService.unsubscribeToDictionary(subscribeDictionaryDto.getId(), userId + 1));
+            long subscribesDictionariesCountAfterDelete = subscribeDictionaryRepository.count();
+
+            assertEquals(subscribesDictionariesCountBeforeDelete, subscribesDictionariesCountAfterDelete);
+            assertTrue(subscribeDictionaryRepository.findById(subscribeDictionaryDto.getId()).isPresent());
         }
     }
 }
