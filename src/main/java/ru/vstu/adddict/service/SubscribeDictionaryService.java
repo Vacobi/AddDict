@@ -10,9 +10,12 @@ import ru.vstu.adddict.dto.subscribedictionary.CreateSubscribeDictionaryRequestD
 import ru.vstu.adddict.dto.subscribedictionary.SubscribeDictionaryDto;
 import ru.vstu.adddict.entity.subscribedictionary.SubscribeDictionary;
 import ru.vstu.adddict.exception.NotAllowedException;
+import ru.vstu.adddict.exception.SubscribeDictionaryAlreadyExists;
 import ru.vstu.adddict.mapper.SubscribeDictionaryMapper;
 import ru.vstu.adddict.repository.SubscribeDictionaryRepository;
 import ru.vstu.adddict.validator.SubscribeDictionaryValidator;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -41,10 +44,20 @@ public class SubscribeDictionaryService {
             throw new NotAllowedException(description);
         }
 
+        if (alreadySubscribed(requestDto)) {
+            throw new SubscribeDictionaryAlreadyExists(requestDto.getDictionaryId(), requestDto.getUserId());
+        }
+
         SubscribeDictionary subscribeDictionary = subscribeDictionaryMapper.toSubscribeDictionary(requestDto);
         SubscribeDictionary savedSubscribeDictionary = subscribeDictionaryRepository.save(subscribeDictionary);
 
         return subscribeDictionaryMapper.toDto(savedSubscribeDictionary);
+    }
+
+    private boolean alreadySubscribed(CreateSubscribeDictionaryRequestDto requestDto) {
+        Optional<SubscribeDictionary> subscribeDictionary =
+                subscribeDictionaryRepository.findByUserIdAndDictionaryId(requestDto.getUserId(), requestDto.getDictionaryId());
+        return subscribeDictionary.isPresent();
     }
 
     private boolean forbiddenToThisUser(Long dictionaryId, Long userId) {
