@@ -29,6 +29,9 @@ spring:
     translation-text:
       length: 128
 
+  subscribes-dictionaries:
+    subscribes-dictionaries-page-size: 20
+
   dictionary:
     dictionaries-page-size: 20
 
