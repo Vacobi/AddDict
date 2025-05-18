@@ -81,4 +81,24 @@ public class DictionaryController {
                 .page(pageResponse)
                 .build();
     }
+
+    @GetMapping("/list")
+    public GetUserDictionariesResponseDto<DictionaryResponseDto> getUserDictionaries(
+            @RequestAttribute("x-user-id") Long userId,
+            @RequestParam(defaultValue = "0") int page
+    ) {
+        GetUserDictionariesResponseDto<DictionaryDto> dictionariesDto = dictionaryService.getUserDictionaries(
+                new GetUserDictionariesRequestDto(userId, null, page)
+        );
+
+        PageResponseDto<DictionaryResponseDto> pageResponse = dictionaryMapper.fromPageResponseDto(
+                dictionariesDto.getPage(),
+                dictionaryMapper::toDictionaryResponseDto
+        );
+
+        return GetUserDictionariesResponseDto.<DictionaryResponseDto>builder()
+                .userId(dictionariesDto.getUserId())
+                .page(pageResponse)
+                .build();
+    }
 }
