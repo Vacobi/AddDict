@@ -11,6 +11,7 @@ import ru.vstu.adddict.dto.subscribedictionary.SubscribeDictionaryDto;
 import ru.vstu.adddict.entity.subscribedictionary.SubscribeDictionary;
 import ru.vstu.adddict.exception.NotAllowedException;
 import ru.vstu.adddict.exception.SubscribeDictionaryAlreadyExists;
+import ru.vstu.adddict.exception.SubscribeNonExistsException;
 import ru.vstu.adddict.mapper.SubscribeDictionaryMapper;
 import ru.vstu.adddict.repository.SubscribeDictionaryRepository;
 import ru.vstu.adddict.validator.SubscribeDictionaryValidator;
@@ -74,5 +75,31 @@ public class SubscribeDictionaryService {
         }
 
         return dictionary.isOwner(userId);
+    }
+
+    @Transactional
+    public boolean unsubscribeToDictionary(Long id, Long userId) {
+        Optional<SubscribeDictionary> optionalSubscribeDictionary = getSubscribeDictionary(id);
+
+        if (optionalSubscribeDictionary.isEmpty()) {
+            throw new SubscribeNonExistsException(id);
+        }
+
+        SubscribeDictionary subscribeDictionary = optionalSubscribeDictionary.get();
+
+        if (!subscribeDictionary.getUserId().equals(userId)) {
+            String description = "Subscribe with id: " +
+                    id +
+                    " belongs to other user";
+            throw new NotAllowedException(description);
+        }
+
+        subscribeDictionaryRepository.deleteById(id);
+
+        return true;
+    }
+
+    private Optional<SubscribeDictionary> getSubscribeDictionary(Long id) {
+        return subscribeDictionaryRepository.findById(id);
     }
 }
