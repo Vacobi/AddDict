@@ -162,4 +162,24 @@ class SubscribeDictionaryServiceTest extends ClearableTest {
             assertTrue(subscribeDictionaryRepository.findById(subscribeDictionaryDto.getId()).isPresent());
         }
     }
+
+    @Nested
+    class UnsubscribeDictionaryByDictionaryIdTest {
+        @Test
+        void unsubscribeFromDictionary() {
+            DictionaryDto dictionaryDto = createDictionary(true, 9999L);
+            Long userId = 1L;
+            boolean expectedDeleted = true;
+
+            SubscribeDictionaryDto subscribeDictionaryDto = getSubscribeDictionary(dictionaryDto.getId(), userId);
+
+            long subscribesDictionariesCountBeforeDelete = subscribeDictionaryRepository.count();
+            boolean actualDeleted = subscribeDictionaryService.unsubscribeToDictionaryByDictionaryId(dictionaryDto.getId(), userId);
+            long subscribesDictionariesCountAfterDelete = subscribeDictionaryRepository.count();
+
+            assertEquals(expectedDeleted, actualDeleted);
+            assertEquals(subscribesDictionariesCountBeforeDelete - 1, subscribesDictionariesCountAfterDelete);
+            assertTrue(subscribeDictionaryRepository.findById(subscribeDictionaryDto.getId()).isEmpty());
+        }
+    }
 }
