@@ -1,6 +1,8 @@
 package ru.vstu.adddict.repository;
 
 import jakarta.persistence.LockModeType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.transaction.annotation.Propagation;
@@ -33,4 +35,8 @@ public interface DictionariesRepository extends JpaRepository<Dictionary, Long> 
     }
 
     List<Dictionary> getDictionaryById(Long id);
+
+    Page<Dictionary> getDictionariesByAuthorId(Long authorId, Pageable pageable);
+
+    Page<Dictionary> getDictionariesByAuthorIdAndIsPublic(Long authorId, boolean b, Pageable pageable);
 }
