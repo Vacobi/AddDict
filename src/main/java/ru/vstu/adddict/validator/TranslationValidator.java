@@ -3,7 +3,7 @@ package ru.vstu.adddict.validator;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import ru.vstu.adddict.dto.translation.CreateTranslationRequestDto;
-import ru.vstu.adddict.dto.dictionary.GetDictionaryTranslationsRequestDto;
+import ru.vstu.adddict.dto.translation.GetDictionaryTranslationsRequestDto;
 import ru.vstu.adddict.dto.translation.UpdateTranslationRequestDto;
 import ru.vstu.adddict.exception.ClientExceptionName;
 import ru.vstu.adddict.exception.GroupValidationException;
