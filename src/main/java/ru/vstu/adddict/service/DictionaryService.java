@@ -162,4 +162,28 @@ public class DictionaryService {
     private Page<Dictionary> getPublicUserDictionariesByUserId(Long authorId, int page) {
         return dictionariesRepository.getDictionariesByAuthorIdAndIsPublic(authorId, true, PageRequest.of(page, dictionariesPageSize));
     }
+
+    public GetUserDictionariesResponseDto<DictionaryDto> getUserSubscribedDictionaries(GetUserSubscribedDictionariesRequestDto requestDto) {
+        dictionaryValidator.validateGetUserSubscribedDictionariesRequestDto(requestDto).ifPresent(e -> {
+            throw e;
+        });
+
+        Page<Dictionary> page = dictionariesRepository.findSubscribedDictionaries(requestDto.getUserId(), PageRequest.of(requestDto.getPage(), dictionariesPageSize));
+
+        List<DictionaryDto> dictionaries = page
+                .stream()
+                .map(dictionaryMapper::toDto)
+                .collect(Collectors.toList());
+
+        return GetUserDictionariesResponseDto.<DictionaryDto>builder()
+                .userId(requestDto.getUserId())
+                .page(PageResponseDto.<DictionaryDto>builder()
+                        .content(dictionaries)
+                        .page(page.getNumber())
+                        .pageSize(dictionaries.size())
+                        .totalElements(page.getTotalElements())
+                        .totalPages(page.getTotalPages())
+                        .build()
+                ).build();
+    }
 }
