@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import ru.vstu.adddict.dto.dictionary.CreateDictionaryRequestDto;
 import ru.vstu.adddict.dto.dictionary.GetUserDictionariesRequestDto;
+import ru.vstu.adddict.dto.dictionary.GetUserSubscribedDictionariesRequestDto;
 import ru.vstu.adddict.dto.dictionary.UpdateDictionaryRequestDto;
 import ru.vstu.adddict.exception.ClientExceptionName;
 import ru.vstu.adddict.exception.GroupValidationException;
@@ -108,6 +109,22 @@ public class DictionaryValidator {
 
         if (request.getRequestSenderId() != null && request.getRequestSenderId() <= 0) {
             String exceptionDescription = "Request sender id must be positive";
+            exceptions.add(new ValidationException(exceptionDescription, ClientExceptionName.INVALID_GET_USER_DICTIONARIES_REQUEST));
+        }
+
+        if (request.getPage() < 0) {
+            String exceptionDescription = "Page must be non-negative";
+            exceptions.add(new ValidationException(exceptionDescription, ClientExceptionName.INVALID_GET_DICTIONARY_TRANSLATIONS_REQUEST));
+        }
+
+        return exceptions.isEmpty() ? Optional.empty() : Optional.of(new GroupValidationException(exceptions));
+    }
+
+    public Optional<GroupValidationException> validateGetUserSubscribedDictionariesRequestDto(GetUserSubscribedDictionariesRequestDto request) {
+        List<ValidationException> exceptions = new LinkedList<>();
+
+        if (request.getUserId() == null || request.getUserId() <= 0) {
+            String exceptionDescription = "User id must be positive";
             exceptions.add(new ValidationException(exceptionDescription, ClientExceptionName.INVALID_GET_USER_DICTIONARIES_REQUEST));
         }
 
