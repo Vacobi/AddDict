@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import ru.vstu.adddict.dto.PageResponseDto;
 import ru.vstu.adddict.dto.dictionary.*;
 import ru.vstu.adddict.mapper.DictionaryMapper;
 import ru.vstu.adddict.service.DictionaryService;
@@ -59,5 +60,25 @@ public class DictionaryController {
         dictionaryService.deleteDictionary(id, userId);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/list/me")
+    public GetUserDictionariesResponseDto<DictionaryResponseDto> getMyDictionaries(
+            @RequestAttribute("x-user-id") Long userId,
+            @RequestParam(defaultValue = "0") int page
+    ) {
+        GetUserDictionariesResponseDto<DictionaryDto> dictionariesDto = dictionaryService.getUserDictionaries(
+                new GetUserDictionariesRequestDto(userId, userId, page)
+        );
+
+        PageResponseDto<DictionaryResponseDto> pageResponse = dictionaryMapper.fromPageResponseDto(
+                dictionariesDto.getPage(),
+                dictionaryMapper::toDictionaryResponseDto
+        );
+
+        return GetUserDictionariesResponseDto.<DictionaryResponseDto>builder()
+                .userId(dictionariesDto.getUserId())
+                .page(pageResponse)
+                .build();
     }
 }
