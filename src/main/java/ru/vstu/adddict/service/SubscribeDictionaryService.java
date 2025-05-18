@@ -2,12 +2,14 @@ package ru.vstu.adddict.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.vstu.adddict.dto.PageResponseDto;
 import ru.vstu.adddict.dto.dictionary.DictionaryDto;
 import ru.vstu.adddict.dto.dictionary.GetDictionaryRequestDto;
-import ru.vstu.adddict.dto.subscribedictionary.CreateSubscribeDictionaryRequestDto;
-import ru.vstu.adddict.dto.subscribedictionary.SubscribeDictionaryDto;
+import ru.vstu.adddict.dto.subscribedictionary.*;
 import ru.vstu.adddict.entity.subscribedictionary.SubscribeDictionary;
 import ru.vstu.adddict.exception.NotAllowedException;
 import ru.vstu.adddict.exception.SubscribeDictionaryAlreadyExists;
@@ -16,7 +18,9 @@ import ru.vstu.adddict.mapper.SubscribeDictionaryMapper;
 import ru.vstu.adddict.repository.SubscribeDictionaryRepository;
 import ru.vstu.adddict.validator.SubscribeDictionaryValidator;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +34,8 @@ public class SubscribeDictionaryService {
     private final SubscribeDictionaryMapper subscribeDictionaryMapper;
 
     private final DictionaryService dictionaryService;
+
+    private final int subscribesDictionariesPageSize;
 
     @Transactional
     public SubscribeDictionaryDto subscribeDictionary(CreateSubscribeDictionaryRequestDto requestDto) {
@@ -127,5 +133,30 @@ public class SubscribeDictionaryService {
 
     private Optional<SubscribeDictionary> getSubscribeDictionary(Long dictionaryId, Long subscriberId) {
         return subscribeDictionaryRepository.findByDictionaryIdAndUserId(dictionaryId, subscriberId);
+    }
+
+    public GetUserSubscribesDictionariesResponseDto<SubscribeDictionaryDto> getUserSubscribes(GetUserSubscribesDictionariesRequestDto requestDto) {
+        subscribeDictionaryValidator.validateGetUserSubscribesDictionariesRequestDto(requestDto).ifPresent(e -> {
+            throw e;
+        });
+
+        Page<SubscribeDictionary> page =
+                subscribeDictionaryRepository.getSubscribeDictionariesByUserId(requestDto.getUserId(), PageRequest.of(requestDto.getPage(), subscribesDictionariesPageSize));
+
+        List<SubscribeDictionaryDto> subscribeDictionaries = page
+                .stream()
+                .map(subscribeDictionaryMapper::toDto)
+                .collect(Collectors.toList());
+
+        return GetUserSubscribesDictionariesResponseDto.<SubscribeDictionaryDto>builder()
+                .userId(requestDto.getUserId())
+                .page(PageResponseDto.<SubscribeDictionaryDto>builder()
+                        .content(subscribeDictionaries)
+                        .page(page.getNumber())
+                        .pageSize(subscribeDictionaries.size())
+                        .totalElements(page.getTotalElements())
+                        .totalPages(page.getTotalPages())
+                        .build()
+                ).build();
     }
 }
