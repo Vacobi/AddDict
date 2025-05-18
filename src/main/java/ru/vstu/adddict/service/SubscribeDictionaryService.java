@@ -102,4 +102,30 @@ public class SubscribeDictionaryService {
     private Optional<SubscribeDictionary> getSubscribeDictionary(Long id) {
         return subscribeDictionaryRepository.findById(id);
     }
+
+    @Transactional
+    public boolean unsubscribeToDictionaryByDictionaryId(Long dictionaryId, Long userId) {
+        Optional<SubscribeDictionary> optionalSubscribeDictionary = getSubscribeDictionary(dictionaryId, userId);
+
+        if (optionalSubscribeDictionary.isEmpty()) {
+            throw new SubscribeNonExistsException(userId, dictionaryId);
+        }
+
+        SubscribeDictionary subscribeDictionary = optionalSubscribeDictionary.get();
+
+        if (!subscribeDictionary.getUserId().equals(userId)) {
+            String description = "Subscribe with id: " +
+                    subscribeDictionary.getId() +
+                    " belongs to other user";
+            throw new NotAllowedException(description);
+        }
+
+        subscribeDictionaryRepository.deleteById(subscribeDictionary.getId());
+
+        return true;
+    }
+
+    private Optional<SubscribeDictionary> getSubscribeDictionary(Long dictionaryId, Long subscriberId) {
+        return subscribeDictionaryRepository.findByDictionaryIdAndUserId(dictionaryId, subscriberId);
+    }
 }
