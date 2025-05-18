@@ -38,4 +38,14 @@ public class SubscribeDictionaryController {
 
         return ResponseEntity.noContent().build();
     }
+
+    @DeleteMapping("/{dictionaryId}")
+    public ResponseEntity<Object> unsubscribeByDictionaryId(
+            @PathVariable Long dictionaryId,
+            @RequestAttribute(value = "x-user-id") Long userId
+    ) {
+        dictionarySubscribesService.unsubscribeToDictionaryByDictionaryId(dictionaryId, userId);
+
+        return ResponseEntity.noContent().build();
+    }
 }
