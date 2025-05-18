@@ -4,6 +4,7 @@ import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
+import ru.vstu.adddict.dto.PageResponseDto;
 import ru.vstu.adddict.dto.dictionary.CreateDictionaryRequestDto;
 import ru.vstu.adddict.dto.dictionary.DictionaryDto;
 import ru.vstu.adddict.dto.dictionary.DictionaryResponseDto;
@@ -12,6 +13,8 @@ import ru.vstu.adddict.entity.dictionary.BaseDictionary;
 import ru.vstu.adddict.entity.dictionary.Dictionary;
 
 import java.time.LocalDateTime;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Mapper(
         componentModel = "spring",
@@ -56,4 +59,18 @@ public interface DictionaryMapper {
     }
 
     DictionaryResponseDto toDictionaryResponseDto(DictionaryDto dictionary);
+
+    default <S, D> PageResponseDto<D> fromPageResponseDto(PageResponseDto<S> page, Function<S, D> map) {
+        return PageResponseDto.<D>builder()
+                .page(page.getPage())
+                .pageSize(page.getPageSize())
+                .totalPages(page.getTotalPages())
+                .totalElements(page.getTotalElements())
+                .content(
+                        page.getContent().stream()
+                                .map(map)
+                                .collect(Collectors.toList())
+                )
+                .build();
+    }
 }
