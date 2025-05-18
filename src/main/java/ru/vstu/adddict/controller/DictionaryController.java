@@ -101,4 +101,24 @@ public class DictionaryController {
                 .page(pageResponse)
                 .build();
     }
+
+    @GetMapping("/list/subscribed")
+    public GetUserDictionariesResponseDto<DictionaryResponseDto> getUserSubscribedDictionaries(
+            @RequestAttribute("x-user-id") Long userId,
+            @RequestParam(defaultValue = "0") int page
+    ) {
+        GetUserDictionariesResponseDto<DictionaryDto> dictionariesDto = dictionaryService.getUserSubscribedDictionaries(
+                new GetUserSubscribedDictionariesRequestDto(userId, page)
+        );
+
+        PageResponseDto<DictionaryResponseDto> pageResponse = dictionaryMapper.fromPageResponseDto(
+                dictionariesDto.getPage(),
+                dictionaryMapper::toDictionaryResponseDto
+        );
+
+        return GetUserDictionariesResponseDto.<DictionaryResponseDto>builder()
+                .userId(dictionariesDto.getUserId())
+                .page(pageResponse)
+                .build();
+    }
 }

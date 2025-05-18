@@ -34,6 +34,7 @@ public class RequestSecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/dictionaries/{id}").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/dictionaries/list/me").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/dictionaries/list").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/dictionaries/list/subscribed").permitAll()
 
                         .requestMatchers(HttpMethod.GET, "/api/v1/dictionaries/{dictionaryId}/words/{translationId}").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/dictionaries/{dictionaryId}/words").permitAll()
@@ -44,7 +45,7 @@ public class RequestSecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/subscribe/dictionary/{dictionaryId}").permitAll()
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/subscribe/dictionary/subscribe/{id}").permitAll()
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/subscribe/dictionary/{dictionaryId}").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/subscribe/dictionary//list/me").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/subscribe/dictionary/list/me").permitAll()
 
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated()
