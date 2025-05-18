@@ -5,6 +5,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import ru.vstu.adddict.entity.dictionary.Dictionary;
@@ -39,4 +41,12 @@ public interface DictionariesRepository extends JpaRepository<Dictionary, Long> 
     Page<Dictionary> getDictionariesByAuthorId(Long authorId, Pageable pageable);
 
     Page<Dictionary> getDictionariesByAuthorIdAndIsPublic(Long authorId, boolean b, Pageable pageable);
+
+    @Query("""
+    SELECT d
+    FROM Dictionary d
+    JOIN SubscribeDictionary sd ON sd.dictionaryId = d.id
+    WHERE sd.userId = :userIdValue
+    """)
+    Page<Dictionary> findSubscribedDictionaries(@Param("userIdValue") Long userId, Pageable pageable);
 }
