@@ -13,6 +13,9 @@ public class DictionaryConfig {
     @Value("${spring.dictionary-validation-rule.description.length}")
     public int dictionaryDescriptionLength;
 
+    @Value("${spring.dictionary.dictionaries-page-size}")
+    public int dictionariesPageSize;
+
     @Bean
     public int dictionaryNameLength() {
         return dictionaryNameLength;
@@ -21,6 +24,11 @@ public class DictionaryConfig {
     @Bean
     public int dictionaryDescriptionLength() {
         return dictionaryDescriptionLength;
+    }
+
+    @Bean
+    public int dictionariesPageSize() {
+        return dictionariesPageSize;
     }
 
     @Bean
