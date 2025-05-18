@@ -92,7 +92,7 @@ public class TranslationValidator {
         }
 
         if (request.getDictionaryId() == null || request.getDictionaryId() <= 0) {
-            String exceptionDescription = "User id must be present and positive";
+            String exceptionDescription = "Dictionary id must be present and positive";
             exceptions.add(new ValidationException(exceptionDescription, ClientExceptionName.INVALID_GET_DICTIONARY_TRANSLATIONS_REQUEST));
         }
 
