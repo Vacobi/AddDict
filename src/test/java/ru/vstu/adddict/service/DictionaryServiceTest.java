@@ -12,9 +12,13 @@ import ru.vstu.adddict.dto.dictionary.DictionaryDto;
 import ru.vstu.adddict.dto.dictionary.GetDictionaryRequestDto;
 import ru.vstu.adddict.dto.dictionary.UpdateDictionaryRequestDto;
 import ru.vstu.adddict.entity.dictionary.Dictionary;
+import ru.vstu.adddict.entity.subscribedictionary.SubscribeDictionary;
+import ru.vstu.adddict.entity.translation.Translation;
 import ru.vstu.adddict.exception.NotAllowedException;
 import ru.vstu.adddict.mapper.DictionaryMapper;
 import ru.vstu.adddict.repository.DictionariesRepository;
+import ru.vstu.adddict.repository.SubscribeDictionaryRepository;
+import ru.vstu.adddict.repository.TranslationRepository;
 import ru.vstu.adddict.testutils.ClearableTest;
 
 import java.time.LocalDateTime;
@@ -175,6 +179,12 @@ class DictionaryServiceTest {
 
     @Nested
     class DeleteDictionaryTest extends ClearableTest {
+        @Autowired
+        private TranslationRepository translationRepository;
+
+        @Autowired
+        private SubscribeDictionaryRepository subscribeDictionaryRepository;
+
         DictionaryDto generateDictionaryToRepos(Long authorId) {
 
             String name = "test";
@@ -248,6 +258,55 @@ class DictionaryServiceTest {
 
             assertEquals(countOfDictionariesInReposBeforeUpdate, countOfDictionariesInReposAfterUpdate);
             assertEquals(1, dictionariesRepository.getDictionaryById(dictionaryId).size());
+        }
+
+        @Test
+        void cascadeDelete() {
+            final Long authorId = 1L;
+            LocalDateTime now = LocalDateTime.now();
+            Dictionary dictionaryToPersist = Dictionary.builder()
+                    .name("test")
+                    .description("test description")
+                    .isPublic(true)
+                    .createdAt(now)
+                    .authorId(authorId)
+                    .build();
+
+            Dictionary persistedDictionary = dictionariesRepository.save(dictionaryToPersist);
+            final Long dictionaryId = persistedDictionary.getId();
+
+            Translation translationToPersist = Translation.builder()
+                    .originText("originText")
+                    .translationText("translationText")
+                    .dictionaryId(dictionaryId)
+                    .build();
+            Translation persistedTranslation = translationRepository.save(translationToPersist);
+
+            SubscribeDictionary subscribeDictionaryToPersist = SubscribeDictionary.builder()
+                    .dictionaryId(dictionaryId)
+                    .userId(authorId + 1)
+                    .build();
+            SubscribeDictionary persistedSubscribeDictionary = subscribeDictionaryRepository.save(subscribeDictionaryToPersist);
+
+            boolean expectedDeleted = true;
+
+
+            long countOfDictionariesInReposBeforeDelete = dictionariesRepository.count();
+            long countOfTranslationsInReposBeforeDelete = translationRepository.count();
+            long countOfSubscribesInReposBeforeDelete = subscribeDictionaryRepository.count();
+            boolean actualDeleted = dictionaryService.deleteDictionary(dictionaryId, authorId);
+            long countOfDictionariesInReposAfterDelete = dictionariesRepository.count();
+            long countOfTranslationsInReposAfterDelete = translationRepository.count();
+            long countOfSubscribesInReposAfterDelete = subscribeDictionaryRepository.count();
+
+
+            assertEquals(expectedDeleted, actualDeleted);
+            assertEquals(countOfDictionariesInReposBeforeDelete - 1, countOfDictionariesInReposAfterDelete);
+            assertEquals(countOfTranslationsInReposBeforeDelete - 1, countOfTranslationsInReposAfterDelete);
+            assertEquals(countOfSubscribesInReposBeforeDelete - 1, countOfSubscribesInReposAfterDelete);
+            assertTrue(dictionariesRepository.findById(dictionaryId).isEmpty());
+            assertTrue(translationRepository.findById(persistedTranslation.getId()).isEmpty());
+            assertTrue(subscribeDictionaryRepository.findById(persistedSubscribeDictionary.getId()).isEmpty());
         }
     }
 }
