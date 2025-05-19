@@ -99,4 +99,26 @@ public class TranslationController {
 
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/words/shuffle")
+    public ShuffleResponseDto<TranslationResponseDto> getShuffle(
+            @RequestBody ShuffleRequestDto shuffleRequestDto,
+            @RequestAttribute(value = "x-user-id") Long userId
+    ) {
+        shuffleRequestDto.setUserId(userId);
+
+        ShuffleResponseDto<TranslationDto> translationsInDictionaryDto
+                = translationService.getShuffledTranslations(shuffleRequestDto);
+
+        PageResponseDto<TranslationResponseDto> pageResponse = translationMapper.fromPageResponseDto(
+                translationsInDictionaryDto.getPage(),
+                translationMapper::toTranslationResponseDto
+        );
+
+        return ShuffleResponseDto.<TranslationResponseDto>builder()
+                .userId(translationsInDictionaryDto.getUserId())
+                .seed(translationsInDictionaryDto.getSeed())
+                .page(pageResponse)
+                .build();
+    }
 }
