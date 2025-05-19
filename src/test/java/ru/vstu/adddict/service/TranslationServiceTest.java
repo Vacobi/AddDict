@@ -5,22 +5,26 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.relational.core.sql.In;
 import org.springframework.test.context.ContextConfiguration;
 import ru.vstu.adddict.config.TestContainersConfig;
 import ru.vstu.adddict.dto.dictionary.CreateDictionaryRequestDto;
 import ru.vstu.adddict.dto.dictionary.DictionaryDto;
-import ru.vstu.adddict.dto.translation.CreateTranslationRequestDto;
-import ru.vstu.adddict.dto.translation.GetTranslationRequestDto;
-import ru.vstu.adddict.dto.translation.TranslationDto;
-import ru.vstu.adddict.dto.translation.UpdateTranslationRequestDto;
+import ru.vstu.adddict.dto.translation.*;
 import ru.vstu.adddict.entity.translation.Translation;
+import ru.vstu.adddict.exception.DictionaryNonExistException;
+import ru.vstu.adddict.exception.NotAllowedDictionaryException;
 import ru.vstu.adddict.exception.NotAllowedException;
 import ru.vstu.adddict.mapper.TranslationMapper;
 import ru.vstu.adddict.repository.TranslationRepository;
 import ru.vstu.adddict.testutils.ClearableTest;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static ru.vstu.adddict.testutils.TestAsserts.assertListOfTranslationsContainsSameTranslations;
 import static ru.vstu.adddict.testutils.TestAsserts.assertTranslationsDtoEquals;
 
 @SpringBootTest
@@ -271,6 +275,258 @@ class TranslationServiceTest extends ClearableTest {
 
             assertEquals(translationsInReposBeforeDelete, translationsInReposAfterDelete);
             assertEquals(1, translationRepository.getTranslationsById(translationId).size());
+        }
+    }
+
+    @Nested
+    class ShuffleTest {
+
+        @Autowired
+        private int shuffleParticionPageSize;
+
+        private List<TranslationDto> fillDictionary(Long dictionaryId, int count) {
+            List<TranslationDto> translationDtos = new LinkedList<>();
+
+            for (int i = 0; i < count; i++) {
+                translationDtos.add(addTranslationInDictionary(dictionaryId));
+
+            }
+
+            return translationDtos;
+        }
+
+        @Test
+        void shuffleInOneOwnPublicDictionary() {
+            Long authorId = 1L;
+            DictionaryDto dictionaryDto = createDictionary(true, authorId);
+
+            List<TranslationDto> expectedTranslations = new LinkedList<>();
+            expectedTranslations.addAll(fillDictionary(dictionaryDto.getId(), shuffleParticionPageSize / 2));
+
+            List<TranslationDto> actualTranslations = new LinkedList<>();
+            long pageSize;
+            int currentPage = 0;
+            do {
+                ShuffleRequestDto requestDto = ShuffleRequestDto.builder()
+                        .dictionaryIds(List.of(dictionaryDto.getId()))
+                        .page(currentPage++)
+                        .userId(authorId)
+                        .build();
+                ShuffleResponseDto<TranslationDto> shuffleResponseDto = translationService.getShuffledTranslations(requestDto);
+                actualTranslations.addAll(shuffleResponseDto.getPage().getContent());
+                pageSize = shuffleResponseDto.getPage().getPageSize();
+            } while (pageSize != 0);
+
+            assertListOfTranslationsContainsSameTranslations(expectedTranslations, actualTranslations);
+        }
+
+        @Test
+        void shuffleInOneOwnPrivateDictionary() {
+            Long authorId = 1L;
+            DictionaryDto dictionaryDto = createDictionary(false, authorId);
+
+            List<TranslationDto> expectedTranslations = new LinkedList<>();
+            expectedTranslations.addAll(fillDictionary(dictionaryDto.getId(), shuffleParticionPageSize / 2));
+
+            List<TranslationDto> actualTranslations = new LinkedList<>();
+            long pageSize;
+            int currentPage = 0;
+            do {
+                ShuffleRequestDto requestDto = ShuffleRequestDto.builder()
+                        .dictionaryIds(List.of(dictionaryDto.getId()))
+                        .page(currentPage++)
+                        .userId(authorId)
+                        .build();
+                ShuffleResponseDto<TranslationDto> shuffleResponseDto = translationService.getShuffledTranslations(requestDto);
+                actualTranslations.addAll(shuffleResponseDto.getPage().getContent());
+                pageSize = shuffleResponseDto.getPage().getPageSize();
+            } while (pageSize != 0);
+
+            assertListOfTranslationsContainsSameTranslations(expectedTranslations, actualTranslations);
+        }
+
+        @Test
+        void shuffleInOneOwnPublicDictionaryWithFewPages() {
+            Long authorId = 1L;
+            DictionaryDto dictionaryDto = createDictionary(true, authorId);
+
+            List<TranslationDto> expectedTranslations = new LinkedList<>();
+            expectedTranslations.addAll(fillDictionary(dictionaryDto.getId(), shuffleParticionPageSize * 3));
+
+            List<TranslationDto> actualTranslations = new LinkedList<>();
+            long pageSize;
+            int currentPage = 0;
+            do {
+                ShuffleRequestDto requestDto = ShuffleRequestDto.builder()
+                        .dictionaryIds(List.of(dictionaryDto.getId()))
+                        .page(currentPage++)
+                        .userId(authorId)
+                        .build();
+                ShuffleResponseDto<TranslationDto> shuffleResponseDto = translationService.getShuffledTranslations(requestDto);
+                actualTranslations.addAll(shuffleResponseDto.getPage().getContent());
+                pageSize = shuffleResponseDto.getPage().getPageSize();
+            } while (pageSize != 0);
+
+            assertListOfTranslationsContainsSameTranslations(expectedTranslations, actualTranslations);
+        }
+
+        @Test
+        void shuffleInFewOwnDictionariesInOnePage() {
+            List<Long> dictionaryIds = new LinkedList<>();
+            List<TranslationDto> expectedTranslations = new LinkedList<>();
+
+            Long authorId = 1L;
+            dictionaryIds.add(createDictionary(true, authorId).getId());
+            dictionaryIds.add(createDictionary(true, authorId).getId());
+            dictionaryIds.add(createDictionary(true, authorId).getId());
+
+            for (Long id : dictionaryIds) {
+                expectedTranslations.addAll(fillDictionary(id, shuffleParticionPageSize / 3));
+            }
+
+
+            List<TranslationDto> actualTranslations = new LinkedList<>();
+            long pageSize;
+            int currentPage = 0;
+            do {
+                ShuffleRequestDto requestDto = ShuffleRequestDto.builder()
+                        .dictionaryIds(dictionaryIds)
+                        .page(currentPage++)
+                        .userId(authorId)
+                        .build();
+                ShuffleResponseDto<TranslationDto> shuffleResponseDto = translationService.getShuffledTranslations(requestDto);
+                actualTranslations.addAll(shuffleResponseDto.getPage().getContent());
+                pageSize = shuffleResponseDto.getPage().getPageSize();
+            } while (pageSize != 0);
+
+
+            assertListOfTranslationsContainsSameTranslations(expectedTranslations, actualTranslations);
+        }
+
+        @Test
+        void shuffleInFewOwnDictionariesInFewPages() {
+            List<Long> dictionaryIds = new LinkedList<>();
+            List<TranslationDto> expectedTranslations = new LinkedList<>();
+
+            Long authorId = 1L;
+            dictionaryIds.add(createDictionary(true, authorId).getId());
+            dictionaryIds.add(createDictionary(true, authorId).getId());
+            dictionaryIds.add(createDictionary(true, authorId).getId());
+
+            for (Long id : dictionaryIds) {
+                expectedTranslations.addAll(fillDictionary(id, shuffleParticionPageSize * 2));
+            }
+
+
+            List<TranslationDto> actualTranslations = new LinkedList<>();
+            long pageSize;
+            int currentPage = 0;
+            do {
+                ShuffleRequestDto requestDto = ShuffleRequestDto.builder()
+                        .dictionaryIds(dictionaryIds)
+                        .page(currentPage++)
+                        .userId(authorId)
+                        .build();
+                ShuffleResponseDto<TranslationDto> shuffleResponseDto = translationService.getShuffledTranslations(requestDto);
+                actualTranslations.addAll(shuffleResponseDto.getPage().getContent());
+                pageSize = shuffleResponseDto.getPage().getPageSize();
+            } while (pageSize != 0);
+
+
+            assertListOfTranslationsContainsSameTranslations(expectedTranslations, actualTranslations);
+        }
+
+        @Test
+        void shuffleInOneNonOwnedPublicDictionary() {
+            Long authorId = 1L;
+            DictionaryDto dictionaryDto = createDictionary(true, authorId);
+
+            Long requestSenderId = 2L;
+            List<TranslationDto> expectedTranslations = new LinkedList<>();
+            expectedTranslations.addAll(fillDictionary(dictionaryDto.getId(), shuffleParticionPageSize / 2));
+
+            List<TranslationDto> actualTranslations = new LinkedList<>();
+            long pageSize;
+            int currentPage = 0;
+            do {
+                ShuffleRequestDto requestDto = ShuffleRequestDto.builder()
+                        .dictionaryIds(List.of(dictionaryDto.getId()))
+                        .page(currentPage++)
+                        .userId(requestSenderId)
+                        .build();
+                ShuffleResponseDto<TranslationDto> shuffleResponseDto = translationService.getShuffledTranslations(requestDto);
+                actualTranslations.addAll(shuffleResponseDto.getPage().getContent());
+                pageSize = shuffleResponseDto.getPage().getPageSize();
+            } while (pageSize != 0);
+
+            assertListOfTranslationsContainsSameTranslations(expectedTranslations, actualTranslations);
+        }
+
+        @Test
+        void shuffleInOneNonOwnedPrivateDictionary() {
+            Long authorId = 1L;
+            DictionaryDto dictionaryDto = createDictionary(false, authorId);
+            Long requestSenderId = 2L;
+
+            ShuffleRequestDto requestDto = ShuffleRequestDto.builder()
+                    .dictionaryIds(List.of(dictionaryDto.getId()))
+                    .page(0)
+                    .userId(requestSenderId)
+                    .build();
+
+            assertThrows(NotAllowedDictionaryException.class, () -> translationService.getShuffledTranslations(requestDto));
+        }
+
+        @Test
+        void shuffleInFewNonOwnedDictionariesOneIsPrivate() {
+            Long authorId = 1L;
+            Long requestSenderId = 2L;
+
+            List<Long> dictionaryIds = new LinkedList<>();
+            dictionaryIds.add(createDictionary(true, authorId).getId());
+            dictionaryIds.add(createDictionary(false, authorId).getId());
+            dictionaryIds.add(createDictionary(true, authorId).getId());
+
+            ShuffleRequestDto requestDto = ShuffleRequestDto.builder()
+                    .dictionaryIds(dictionaryIds)
+                    .page(0)
+                    .userId(requestSenderId)
+                    .build();
+
+            assertThrows(NotAllowedDictionaryException.class, () -> translationService.getShuffledTranslations(requestDto));
+        }
+
+        @Test
+        void shuffleInOneNonExistingDictionary() {
+            Long requestSenderId = 2L;
+            Long dictionaryId = Long.MAX_VALUE;
+
+            ShuffleRequestDto requestDto = ShuffleRequestDto.builder()
+                    .dictionaryIds(List.of(dictionaryId))
+                    .page(0)
+                    .userId(requestSenderId)
+                    .build();
+
+            assertThrows(DictionaryNonExistException.class, () -> translationService.getShuffledTranslations(requestDto));
+        }
+
+        @Test
+        void shuffleInFewDictionariesOneIsNonExisting() {
+            Long authorId = 1L;
+            Long requestSenderId = 2L;
+
+            List<Long> dictionaryIds = new LinkedList<>();
+            dictionaryIds.add(createDictionary(true, authorId).getId());
+            dictionaryIds.add(Long.MAX_VALUE);
+            dictionaryIds.add(createDictionary(true, authorId).getId());
+
+            ShuffleRequestDto requestDto = ShuffleRequestDto.builder()
+                    .dictionaryIds(dictionaryIds)
+                    .page(0)
+                    .userId(requestSenderId)
+                    .build();
+
+            assertThrows(DictionaryNonExistException.class, () -> translationService.getShuffledTranslations(requestDto));
         }
     }
 }
