@@ -5,6 +5,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import ru.vstu.adddict.entity.translation.Translation;
@@ -39,4 +41,24 @@ public interface TranslationRepository extends JpaRepository<Translation, Long> 
     }
 
     List<Translation> getTranslationsById(Long id);
+
+    @Query(
+            value = """
+            SELECT *
+            FROM translations
+            WHERE dictionary_id IN (:dictionaryIds)
+            ORDER BY md5(CAST(id AS text) || :seed)
+            """,
+                    countQuery = """
+            SELECT count(*)
+            FROM translations
+            WHERE dictionary_id IN (:dictionaryIds)
+            """,
+            nativeQuery = true
+    )
+    Page<Translation> findShuffledTranslations(
+            @Param("dictionaryIds") List<Long> dictionaryIds,
+            @Param("seed") String seed,
+            Pageable pageable
+    );
 }
