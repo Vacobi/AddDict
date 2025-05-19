@@ -5,6 +5,8 @@ import ru.vstu.adddict.dto.subscribedictionary.SubscribeDictionaryDto;
 import ru.vstu.adddict.dto.translation.TranslationDto;
 
 import java.time.LocalDateTime;
+import java.util.LinkedList;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -43,5 +45,25 @@ public class TestAsserts {
         assertEquals(expected.getId(), actual.getId());
         assertEquals(expected.getUserId(), actual.getUserId());
         assertEquals(expected.getDictionaryId(), actual.getDictionaryId());
+    }
+
+    public static void assertListOfTranslationsContainsSameTranslations(List<TranslationDto> expected, List<TranslationDto> actual) {
+        assertEquals(expected.size(), actual.size());
+        List<TranslationDto> actualCopy = new LinkedList<>(actual);
+        for (int i = 0; i < expected.size(); i++) {
+            TranslationDto expectedTranslation = expected.get(i);
+            boolean match = false;
+            for (int j = 0; j < actualCopy.size() && !match; j++) {
+                TranslationDto actualTranslation = actualCopy.get(j);
+                if (actualTranslation.getId() == expectedTranslation.getId()) {
+                    assertTranslationsDtoEquals(expectedTranslation, actualTranslation);
+                    actualCopy.remove(j);
+                }
+                match = true;
+            }
+            if (!match) {
+                fail();
+            }
+        }
     }
 }

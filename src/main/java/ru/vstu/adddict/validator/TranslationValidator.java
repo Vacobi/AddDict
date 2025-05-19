@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import ru.vstu.adddict.dto.translation.CreateTranslationRequestDto;
 import ru.vstu.adddict.dto.translation.GetDictionaryTranslationsRequestDto;
+import ru.vstu.adddict.dto.translation.ShuffleRequestDto;
 import ru.vstu.adddict.dto.translation.UpdateTranslationRequestDto;
 import ru.vstu.adddict.exception.ClientExceptionName;
 import ru.vstu.adddict.exception.GroupValidationException;
@@ -95,6 +96,18 @@ public class TranslationValidator {
             String exceptionDescription = "Dictionary id must be present and positive";
             exceptions.add(new ValidationException(exceptionDescription, ClientExceptionName.INVALID_GET_DICTIONARY_TRANSLATIONS_REQUEST));
         }
+
+        if (request.getPage() < 0) {
+            String exceptionDescription = "Page must be non-negative";
+            exceptions.add(new ValidationException(exceptionDescription, ClientExceptionName.INVALID_GET_DICTIONARY_TRANSLATIONS_REQUEST));
+        }
+
+        return exceptions.isEmpty() ? Optional.empty() : Optional.of(new GroupValidationException(exceptions));
+    }
+
+    public Optional<GroupValidationException> validateShuffleRequest(ShuffleRequestDto request) {
+
+        List<ValidationException> exceptions = new LinkedList<>();
 
         if (request.getPage() < 0) {
             String exceptionDescription = "Page must be non-negative";

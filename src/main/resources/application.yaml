@@ -37,6 +37,7 @@ spring:
 
   translation:
     translation-page-size: 20
+    shuffle-particion-page-size: 20
 
   data:
     redis:

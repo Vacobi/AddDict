@@ -9,22 +9,17 @@ import org.springframework.stereotype.Service;
 import ru.vstu.adddict.dto.*;
 import ru.vstu.adddict.dto.dictionary.DictionaryDto;
 import ru.vstu.adddict.dto.dictionary.GetDictionaryRequestDto;
-import ru.vstu.adddict.dto.translation.GetDictionaryTranslationsRequestDto;
-import ru.vstu.adddict.dto.translation.GetDictionaryTranslationsResponseDto;
-import ru.vstu.adddict.dto.translation.CreateTranslationRequestDto;
-import ru.vstu.adddict.dto.translation.GetTranslationRequestDto;
-import ru.vstu.adddict.dto.translation.TranslationDto;
-import ru.vstu.adddict.dto.translation.UpdateTranslationRequestDto;
+import ru.vstu.adddict.dto.translation.*;
 import ru.vstu.adddict.entity.translation.Translation;
+import ru.vstu.adddict.exception.DictionaryNonExistException;
+import ru.vstu.adddict.exception.NotAllowedDictionaryException;
 import ru.vstu.adddict.exception.NotAllowedException;
 import ru.vstu.adddict.exception.TranslationNonExistException;
 import ru.vstu.adddict.mapper.TranslationMapper;
 import ru.vstu.adddict.repository.TranslationRepository;
 import ru.vstu.adddict.validator.TranslationValidator;
 
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -40,6 +35,7 @@ public class TranslationService {
     private final DictionaryService dictionaryService;
 
     private final int translationsPageSize;
+    private final int shuffleParticionPageSize;
 
     @Transactional
     public TranslationDto getTranslation(GetTranslationRequestDto getDictionaryRequestDto, Long userId) {
@@ -192,5 +188,56 @@ public class TranslationService {
         }
 
         return !dictionary.isOwner(userId);
+    }
+
+    @Transactional
+    public ShuffleResponseDto<TranslationDto> getShuffledTranslations(ShuffleRequestDto requestDto) {
+        translationValidator.validateShuffleRequest(requestDto).ifPresent(e -> {
+            throw e;
+        });
+
+        validateShuffleRequestDictionaries(requestDto);
+
+        Page<Translation> page = translationRepository.findShuffledTranslations(
+                requestDto.getDictionaryIds(),
+                requestDto.getSeed(),
+                PageRequest.of(requestDto.getPage(), shuffleParticionPageSize)
+        );
+
+        List<TranslationDto> shuffledTranslations = page
+                .stream()
+                .map(translationMapper::toTranslationDto)
+                .toList();
+
+        return ShuffleResponseDto.<TranslationDto>builder()
+                .userId(requestDto.getUserId())
+                .seed(requestDto.getSeed())
+                .page(PageResponseDto.<TranslationDto>builder()
+                        .content(shuffledTranslations)
+                        .page(page.getNumber())
+                        .pageSize(shuffledTranslations.size())
+                        .totalElements(page.getTotalElements())
+                        .totalPages(page.getTotalPages())
+                        .build()
+                ).build();
+    }
+
+    private void validateShuffleRequestDictionaries(ShuffleRequestDto requestDto) {
+        requestDto.getDictionaryIds().forEach(dictionaryId -> {
+            GetDictionaryRequestDto getDictionaryRequestDto = GetDictionaryRequestDto.builder()
+                    .id(dictionaryId)
+                    .requestSenderId(requestDto.getUserId())
+                    .build();
+
+            try {
+                dictionaryService.getDictionary(getDictionaryRequestDto);
+            } catch (NotAllowedException ignored) {
+                String reason = "User with id: " + requestDto.getUserId() +
+                        " can't use dictionary with id: " + dictionaryId + " in shuffle.";
+                throw new NotAllowedDictionaryException(reason);
+            } catch (DictionaryNonExistException e) {
+                throw e;
+            }
+        });
     }
 }

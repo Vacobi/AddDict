@@ -13,7 +13,7 @@ import ru.vstu.adddict.service.TranslationService;
 
 @Controller
 @RestController
-@RequestMapping("api/v1/dictionaries/{dictionaryId}/words")
+@RequestMapping("api/v1/dictionaries")
 @RequiredArgsConstructor
 public class TranslationController {
 
@@ -21,7 +21,7 @@ public class TranslationController {
 
     private final TranslationMapper translationMapper;
 
-    @GetMapping("/{translationId}")
+    @GetMapping("/{dictionaryId}/words/{translationId}")
     public TranslationResponseDto getTranslation(
             @PathVariable Long dictionaryId,
             @PathVariable Long translationId,
@@ -37,7 +37,7 @@ public class TranslationController {
         return translationMapper.toTranslationResponseDto(translationDto);
     }
 
-    @PostMapping
+    @PostMapping("/{dictionaryId}/words")
     public TranslationResponseDto createTranslation(
             @RequestBody CreateTranslationRequestDto requestDto,
             @PathVariable Long dictionaryId,
@@ -51,7 +51,7 @@ public class TranslationController {
         return translationMapper.toTranslationResponseDto(translationDto);
     }
 
-    @GetMapping()
+    @GetMapping("/{dictionaryId}/words")
     public GetDictionaryTranslationsResponseDto<TranslationResponseDto> getTranslations(
             @PathVariable Long dictionaryId,
             @RequestParam(defaultValue = "0") int page,
@@ -77,7 +77,7 @@ public class TranslationController {
                 .build();
     }
 
-    @PutMapping("/{translationId}")
+    @PutMapping("/{dictionaryId}/words/{translationId}")
     public TranslationResponseDto updateTranslation(
             @PathVariable Long dictionaryId,
             @RequestBody UpdateTranslationRequestDto requestDto,
@@ -89,7 +89,7 @@ public class TranslationController {
         return translationMapper.toTranslationResponseDto(translationDto);
     }
 
-    @DeleteMapping("/{translationId}")
+    @DeleteMapping("/{dictionaryId}/words/{translationId}")
     public ResponseEntity<Object> deleteDictionary(
             @PathVariable Long dictionaryId,
             @PathVariable Long translationId,
@@ -98,5 +98,27 @@ public class TranslationController {
         translationService.deleteTranslation(dictionaryId, translationId, userId);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/words/shuffle")
+    public ShuffleResponseDto<TranslationResponseDto> getShuffle(
+            @RequestBody ShuffleRequestDto shuffleRequestDto,
+            @RequestAttribute(value = "x-user-id") Long userId
+    ) {
+        shuffleRequestDto.setUserId(userId);
+
+        ShuffleResponseDto<TranslationDto> translationsInDictionaryDto
+                = translationService.getShuffledTranslations(shuffleRequestDto);
+
+        PageResponseDto<TranslationResponseDto> pageResponse = translationMapper.fromPageResponseDto(
+                translationsInDictionaryDto.getPage(),
+                translationMapper::toTranslationResponseDto
+        );
+
+        return ShuffleResponseDto.<TranslationResponseDto>builder()
+                .userId(translationsInDictionaryDto.getUserId())
+                .seed(translationsInDictionaryDto.getSeed())
+                .page(pageResponse)
+                .build();
     }
 }

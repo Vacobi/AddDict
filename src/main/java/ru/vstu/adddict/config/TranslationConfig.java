@@ -16,6 +16,9 @@ public class TranslationConfig {
     @Value("${spring.translation.translation-page-size}")
     private int translationsPageSize;
 
+    @Value("${spring.translation.shuffle-particion-page-size}")
+    private int shuffleParticionPageSize;
+
     @Bean
     public int originTextLength() {
         return originTextLength;
@@ -29,5 +32,10 @@ public class TranslationConfig {
     @Bean
     public int translationsPageSize() {
         return translationsPageSize;
+    }
+
+    @Bean
+    public int shuffleParticionPageSize() {
+        return shuffleParticionPageSize;
     }
 }
