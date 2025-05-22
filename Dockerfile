@@ -1,4 +1,4 @@
-FROM gradle:8.13-jdk21 AS build
+FROM gradle:8.13-jdk17 AS build
 
 WORKDIR /app
 
@@ -6,7 +6,7 @@ COPY . .
 
 RUN gradle build -x test --no-daemon
 
-FROM openjdk:21-jdk
+FROM openjdk:17-jdk
 
 WORKDIR /app
 
