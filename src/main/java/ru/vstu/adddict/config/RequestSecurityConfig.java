@@ -48,6 +48,7 @@ public class RequestSecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/subscribe/dictionary/subscribe/{id}").permitAll()
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/subscribe/dictionary/{dictionaryId}").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/subscribe/dictionary/list/me").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/subscribe/subscribed/dictionary/{dictionaryId}").permitAll()
 
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated()

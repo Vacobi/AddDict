@@ -159,4 +159,8 @@ public class SubscribeDictionaryService {
                         .build()
                 ).build();
     }
+
+    public boolean subscribedToDictionary(Long dictionaryId, Long userId) {
+        return subscribeDictionaryRepository.findByDictionaryIdAndUserId(dictionaryId, userId).isPresent();
+    }
 }

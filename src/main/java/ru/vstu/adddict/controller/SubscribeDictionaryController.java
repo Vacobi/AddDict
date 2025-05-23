@@ -69,4 +69,12 @@ public class SubscribeDictionaryController {
                 .page(pageResponse)
                 .build();
     }
+
+    @GetMapping("/subscribed/{dictionaryId}")
+    public boolean isSubscribed(
+            @PathVariable Long dictionaryId,
+            @RequestAttribute("x-user-id") Long userId
+    ) {
+        return dictionarySubscribesService.subscribedToDictionary(dictionaryId, userId);
+    }
 }
