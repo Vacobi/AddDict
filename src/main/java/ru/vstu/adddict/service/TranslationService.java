@@ -98,7 +98,7 @@ public class TranslationService {
     private TranslationDto updateTranslationInRepository(UpdateTranslationRequestDto updateTranslationRequestDto, Long dictionaryId, Long translationId) {
         try {
             Translation updated = translationRepository.updateWithLock(
-                    dictionaryId,
+                    translationId,
                     persisted -> {
                         persisted = translationMapper.fromUpdateRequest(persisted, updateTranslationRequestDto);
                         return persisted;
