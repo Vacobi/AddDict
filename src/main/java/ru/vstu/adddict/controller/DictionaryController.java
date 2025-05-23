@@ -82,9 +82,9 @@ public class DictionaryController {
                 .build();
     }
 
-    @GetMapping("/list")
+    @GetMapping("/list/{userId}")
     public GetUserDictionariesResponseDto<DictionaryResponseDto> getUserDictionaries(
-            @RequestAttribute("x-user-id") Long userId,
+            @PathVariable Long userId,
             @RequestParam(defaultValue = "0") int page
     ) {
         GetUserDictionariesResponseDto<DictionaryDto> dictionariesDto = dictionaryService.getUserDictionaries(
