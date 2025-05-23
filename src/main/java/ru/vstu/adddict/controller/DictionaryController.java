@@ -121,4 +121,21 @@ public class DictionaryController {
                 .page(pageResponse)
                 .build();
     }
+
+    @GetMapping("/list/feed")
+    public GetUserDictionariesResponseDto<DictionaryResponseDto> getDictFeedDictionaries(
+            @RequestParam(defaultValue = "0") int page
+    ) {
+        GetUserDictionariesResponseDto<DictionaryDto> dictionariesDto = dictionaryService.getFeedDictionaries(page);
+
+        PageResponseDto<DictionaryResponseDto> pageResponse = dictionaryMapper.fromPageResponseDto(
+                dictionariesDto.getPage(),
+                dictionaryMapper::toDictionaryResponseDto
+        );
+
+        return GetUserDictionariesResponseDto.<DictionaryResponseDto>builder()
+                .userId(dictionariesDto.getUserId())
+                .page(pageResponse)
+                .build();
+    }
 }
