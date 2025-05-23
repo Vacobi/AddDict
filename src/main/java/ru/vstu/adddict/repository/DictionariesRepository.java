@@ -55,14 +55,14 @@ public interface DictionariesRepository extends JpaRepository<Dictionary, Long> 
                     SELECT d.* 
                     FROM dictionaries d 
                     INNER JOIN subscribe s ON d.author_id = s.author 
-                    WHERE s.subscriber = :userId 
+                    WHERE s.subscriber = :userId AND d.is_public = true
                     ORDER BY d.created_at DESC
                     """,
             countQuery = """
                     SELECT COUNT(d.*) 
                     FROM dictionaries d 
                     INNER JOIN subscribe s ON d.author_id = s.author 
-                    WHERE s.subscriber = :userId
+                    WHERE s.subscriber = :userId AND d.is_public = true
                     """,
             nativeQuery = true
     )
