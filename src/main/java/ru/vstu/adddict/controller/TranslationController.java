@@ -82,11 +82,12 @@ public class TranslationController {
     @PutMapping("/{dictionaryId}/words/{translationId}")
     public TranslationResponseDto updateTranslation(
             @PathVariable Long dictionaryId,
+            @PathVariable Long translationId,
             @RequestBody UpdateTranslationRequestDto requestDto,
             @RequestAttribute(value = "x-user-id") Long userId
     ) {
         requestDto.setRequestSenderId(userId);
-        TranslationDto translationDto = translationService.updateTranslation(requestDto, dictionaryId, userId);
+        TranslationDto translationDto = translationService.updateTranslation(requestDto, dictionaryId, translationId);
 
         return translationMapper.toTranslationResponseDto(translationDto);
     }
