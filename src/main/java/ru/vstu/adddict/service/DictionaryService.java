@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.vstu.adddict.dto.PageResponseDto;
@@ -36,7 +37,7 @@ public class DictionaryService {
     @Transactional
     public DictionaryDto createDictionary(CreateDictionaryRequestDto createDictionaryRequest) {
         dictionaryValidator.validateCreateDictionaryRequest(createDictionaryRequest).ifPresent(e -> {
-                throw e;
+            throw e;
         });
 
         Dictionary dictionary = dictionaryMapper.toDictionary(createDictionaryRequest);
@@ -183,6 +184,33 @@ public class DictionaryService {
                         .pageSize(dictionaries.size())
                         .totalElements(page.getTotalElements())
                         .totalPages(page.getTotalPages())
+                        .build()
+                ).build();
+    }
+
+    public GetUserDictionariesResponseDto<DictionaryDto> getFeedDictionaries(int page) {
+
+        Long userId = Long.parseLong(
+                ((String) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
+        );
+
+        Page<Dictionary> dictPage = dictionariesRepository.findPublishersDictionaries(
+                userId,
+                PageRequest.of(page, dictionariesPageSize)
+        );
+
+        List<DictionaryDto> dictionaries = dictPage.stream()
+                .map(dictionaryMapper::toDto)
+                .toList();
+
+        return GetUserDictionariesResponseDto.<DictionaryDto>builder()
+                .userId(userId)
+                .page(PageResponseDto.<DictionaryDto>builder()
+                        .content(dictionaries)
+                        .page(dictPage.getNumber())
+                        .pageSize(dictionaries.size())
+                        .totalElements(dictPage.getTotalElements())
+                        .totalPages(dictPage.getTotalPages())
                         .build()
                 ).build();
     }

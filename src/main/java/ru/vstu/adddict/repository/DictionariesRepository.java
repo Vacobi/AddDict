@@ -43,10 +43,31 @@ public interface DictionariesRepository extends JpaRepository<Dictionary, Long> 
     Page<Dictionary> getDictionariesByAuthorIdAndIsPublic(Long authorId, boolean b, Pageable pageable);
 
     @Query("""
-    SELECT d
-    FROM Dictionary d
-    JOIN SubscribeDictionary sd ON sd.dictionaryId = d.id
-    WHERE sd.userId = :userIdValue
-    """)
+            SELECT d
+            FROM Dictionary d
+            JOIN SubscribeDictionary sd ON sd.dictionaryId = d.id
+            WHERE sd.userId = :userIdValue
+            """)
     Page<Dictionary> findSubscribedDictionaries(@Param("userIdValue") Long userId, Pageable pageable);
+
+    @Query(
+            value = """
+                    SELECT d.* 
+                    FROM dictionaries d 
+                    INNER JOIN subscribe s ON d.author_id = s.author 
+                    WHERE s.subscriber = :userId 
+                    ORDER BY d.created_at DESC
+                    """,
+            countQuery = """
+                    SELECT COUNT(d.*) 
+                    FROM dictionaries d 
+                    INNER JOIN subscribe s ON d.author_id = s.author 
+                    WHERE s.subscriber = :userId
+                    """,
+            nativeQuery = true
+    )
+    Page<Dictionary> findPublishersDictionaries(
+            @Param("userId") Long userId,
+            Pageable pageable
+    );
 }
