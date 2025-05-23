@@ -88,7 +88,7 @@ public class DictionaryService {
                     dictionaryId,
                     persisted -> {
                         persisted = dictionaryMapper.fromUpdateRequest(persisted, updateDictionaryRequestDto);
-                        if (!persisted.isDictionaryOwner(dictionaryId)) {
+                        if (!persisted.isDictionaryOwner(updateDictionaryRequestDto.getRequestSenderId())) {
                             throw new NotAllowedException("Can't update dictionary with id: "
                                     + persisted.getId()
                                     + ". This dictionary belongs to other user.");
