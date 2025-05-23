@@ -11,6 +11,8 @@ import ru.vstu.adddict.dto.translation.*;
 import ru.vstu.adddict.mapper.TranslationMapper;
 import ru.vstu.adddict.service.TranslationService;
 
+import java.util.List;
+
 @Controller
 @RestController
 @RequestMapping("api/v1/dictionaries")
@@ -102,10 +104,17 @@ public class TranslationController {
 
     @GetMapping("/words/shuffle")
     public ShuffleResponseDto<TranslationResponseDto> getShuffle(
-            @RequestBody ShuffleRequestDto shuffleRequestDto,
+            @RequestParam List<Long> dictionaryIds,
+            @RequestParam(defaultValue = "") String seed,
+            @RequestParam(defaultValue = "0") int page,
             @RequestAttribute(value = "x-user-id") Long userId
     ) {
-        shuffleRequestDto.setUserId(userId);
+        ShuffleRequestDto shuffleRequestDto = ShuffleRequestDto.builder()
+                .dictionaryIds(dictionaryIds)
+                .seed(seed)
+                .page(page)
+                .userId(userId)
+                .build();
 
         ShuffleResponseDto<TranslationDto> translationsInDictionaryDto
                 = translationService.getShuffledTranslations(shuffleRequestDto);
